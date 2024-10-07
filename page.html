@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bar Chart</title>
+    <link rel="stylesheet" href="css/style.css">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+</head>
+<body>
+    <header>
+        <h1>Data Visualization: Bar Chart</h1>
+        <nav>
+            <ul>
+                <li><a href="index.html">Home</a></li>
+                <li><a href="page.html">Bar Chart</a></li>
+                <li><a href="page2.html">Scatter Plot</a></li>
+            </ul>
+        </nav>
+    </header>
+
+    <main>
+        <div id="barChart"></div>
+    </main>
+
+    <footer>
+        <p>© 2024 Data Visualization Example</p>
+    </footer>
+
+    <script>
+        const barData = [
+            {category: 'A', value: 30},
+            {category: 'B', value: 80},
+            {category: 'C', value: 45},
+            {category: 'D', value: 60},
+            {category: 'E', value: 20},
+            {category: 'F', value: 90},
+            {category: 'G', value: 55}
+        ];
+
+        const width = 500, height = 300, padding = 40;
+
+        const svg = d3.select("#barChart")
+            .append("svg")
+            .attr("width", width)
+            .attr("height", height);
+
+        const xScale = d3.scaleBand()
+            .domain(barData.map(d => d.category))
+            .range([padding, width - padding])
+            .padding(0.2);
+
+        const yScale = d3.scaleLinear()
+            .domain([0, d3.max(barData, d => d.value)])
+            .range([height - padding, padding]);
+
+        svg.selectAll("rect")
+            .data(barData)
+            .enter()
+            .append("rect")
+            .attr("x", d => xScale(d.category))
+            .attr("y", d => yScale(d.value))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - padding - yScale(d.value))
+            .attr("fill", "steelblue");
+
+        // X-axis
+        svg.append("g")
+            .attr("transform", `translate(0, ${height - padding})`)
+            .call(d3.axisBottom(xScale));
+
+        // Y-axis
+        svg.append("g")
+            .attr("transform", `translate(${padding}, 0)`)
+            .call(d3.axisLeft(yScale));
+    </script>
+</body>
+</html>
