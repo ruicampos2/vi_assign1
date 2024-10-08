@@ -3,28 +3,85 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Data Visualization Site</title>
+    <title>Menu Example</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="https://d3js.org/d3.v6.min.js"></script>
 </head>
 <body>
     <header>
-        <h1>Data Visualization with D3.js</h1>
-        <nav>
-            <ul>
-                <li><a href="index.html">Home</a></li>
-                <li><a href="page.html">Bar Chart</a></li>
-                <li><a href="page2.html">Scatter Plot</a></li>
-            </ul>
-        </nav>
+        <nav id="menu"></nav>
     </header>
 
     <main>
         <h2>Welcome to the Data Visualization Website</h2>
-        <p>This site provides interactive data visualizations using D3.js. Navigate through the menu to explore different types of visualizations.</p>
+        <p>This is a demo of a menu created using D3.js and styled to match the example you provided.</p>
     </main>
 
     <footer>
         <p>© 2024 Data Visualization Example</p>
     </footer>
+
+    <script>
+        // Menu items array
+        const menuItems = ['Home', 'Sports', 'Sports', 'Team'];
+
+        // Create menu with D3.js
+        const menu = d3.select("#menu")
+            .append("ul")
+            .style("list-style-type", "none")
+            .style("display", "flex")
+            .style("justify-content", "center")
+            .style("padding", "0")
+            .style("margin", "0 auto")  // Center the menu
+            .style("width", "20%")      // Set the width of the menu
+            .style("background-color", "#333");
+
+        // Add menu items
+        menu.selectAll("li")
+            .data(menuItems)
+            .enter()
+            .append("li")
+            .style("margin", "0 20px")
+            .style("position", "relative")
+            .append("a")
+            .attr("href", "#")
+            .text(d => d)
+            .style("color", "#fff")
+            .style("text-decoration", "none")
+            .style("font-weight", "bold")
+            .style("font-family", "Arial, sans-serif")
+            .on("mouseover", function() {
+                d3.select(this)
+                  .style("color", "lightblue");
+            })
+            .on("mouseout", function() {
+                d3.select(this)
+                  .style("color", "#fff");
+            });
+
+        // Add underline on hover (using D3 transitions)
+        menu.selectAll("li")
+            .append("div")
+            .attr("class", "underline")
+            .style("position", "absolute")
+            .style("bottom", "-5px")
+            .style("left", "0")
+            .style("width", "100%")
+            .style("height", "2px")
+            .style("background-color", "red")
+            .style("opacity", "0")
+            .style("transition", "opacity 0.3s");
+
+        menu.selectAll("li")
+            .on("mouseover", function() {
+                d3.select(this).select(".underline")
+                    .style("opacity", "1");
+            })
+            .on("mouseout", function() {
+                d3.select(this).select(".underline")
+                    .style("opacity", "0");
+            });
+
+    </script>
 </body>
 </html>
