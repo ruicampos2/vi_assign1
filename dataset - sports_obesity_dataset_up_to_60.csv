@@ -1,0 +1,81 @@
+Country,Group,Gender,Obesity Rate (%),Football (%),Basketball (%),Running (%)
+United States,Children,Male,21.66,16,19,12
+United States,Children,Female,19.44,13,11.9,9.9
+United States,Adult,Male,41.64,7,9,22
+United States,Adult,Female,43.82,3.9,6,20
+Brazil,Children,Male,17.07,28.1,9,6
+Brazil,Children,Female,14.29,11.8,5.1,5
+Brazil,Adult,Male,25.05,20.4,7,18.1
+Brazil,Adult,Female,32.60,8,2.9,16.3
+Germany,Children,Male,10.41,25,7,12
+Germany,Children,Female,6.50,8,3,9
+Germany,Adult,Male,23.08,11.9,4,17
+Germany,Adult,Female,18.96,3,1.5,13
+India,Children,Male,3.85,13.9,6.2,8.8
+India,Children,Female,3.7,4.7,2,7
+India,Adult,Male,5.38,4,3,11.4
+India,Adult,Female,9.78,1.5,0.8,8
+Australia,Children,Male,17.22,22.3,13,7.8
+Australia,Children,Female,14.21,10.1,9,7
+Australia,Adult,Male,32.05,10,4.2,13.7
+Australia,Adult,Female,30.00,4,1.9,11
+Nigeria,Children,Male,3.90,28.9,12,10
+Nigeria,Children,Female,3.39,15,6,8
+Nigeria,Adult,Male,8.52,25,10,20
+Nigeria,Adult,Female,17.26,10,5,14.8
+China,Children,Male,15.21,12,15.8,8
+China,Children,Female,7.71,7,10,6
+China,Adult,Male,8.94,8,11.9,18.3
+China,Adult,Female,7.78,4,4.7,12.3
+United Kingdom,Children,Male,12.38,40.4,10,14.9
+United Kingdom,Children,Female,10.15,20,5,12.3
+United Kingdom,Adult,Male,26.94,24.9,7,19.8
+United Kingdom,Adult,Female,28.30,10,3,18
+Japan,Children,Male,6.28,20,8,12
+Japan,Children,Female,2.46,9.8,6,9.8
+Japan,Adult,Male,7.63,10,6,18.1
+Japan,Adult,Female,3.63,4.9,4,15.2
+South Africa,Children,Male,5.13,29.9,9.9,14.8
+South Africa,Children,Female,09.08,11.8,5.8,12
+South Africa,Adult,Male,14.50,25,7.9,17.7
+South Africa,Adult,Female,47.35,10,4,14.9
+Portugal,Children,Male,9.27,41.1,11.9,17.9
+Portugal,Children,Female,6.38,18,5.1,12
+Portugal,Adult,Male,21.97,24.9,6,25
+Portugal,Adult,Female,23.02,7.9,2.9,20
+Spain,Children,Male,12.04,45.8,14.9,19.9
+Spain,Children,Female,9.28,19.9,7.5,14.8
+Spain,Adult,Male,19.39,30,10,28
+Spain,Adult,Female,13.03,10,5,22
+Italy,Children,Male,12.07,34.4,8.1,18
+Italy,Children,Female,7.68,12,4.2,12
+Italy,Adult,Male,12.07,22,7.3,20
+Italy,Adult,Female,17.65,5,2,18
+France,Children,Male,4.39,36.2,10,12
+France,Children,Female,3.90,15,6,10
+France,Adult,Male,10.18,28,8,22
+France,Adult,Female,9.82,12,4,18
+Belgium,Children,Male,7.91,29.9,7.9,17.9
+Belgium,Children,Female,05.05,11.2,4.8,15
+Belgium,Adult,Male,19.79,24.8,5.9,22
+Belgium,Adult,Female,21.21,7,3,18
+Argentina,Children,Male,21.57,51.2,11.5,14.7
+Argentina,Children,Female,18.84,17.9,5,12
+Argentina,Adult,Male,37.24,39.7,10.7,24.7
+Argentina,Adult,Female,37.24,9.6,3.7,19.8
+Denmark,Children,Male,7.41,31.3,8.9,17.9
+Denmark,Children,Female,3.68,14.8,4.2,13.7
+Denmark,Adult,Male,15.70,23.8,6.8,30.4
+Denmark,Adult,Female,11.42,7.90,2,28.7
+Finland,Children,Male,15.18,27.9,7.8,21.2
+Finland,Children,Female,9.94,12,3,15.9
+Finland,Adult,Male,21.88,20.3,5,34.8
+Finland,Adult,Female,22.07,6.80,2,31
+Iceland,Children,Male,10.05,34.8,6.8,14.8
+Iceland,Children,Female,7.20,19.7,3.7,11.4
+Iceland,Adult,Male,10.05,28.8,5.9,28.1
+Iceland,Adult,Female,19.78,12,1.7,24.6
+Norway,Children,Male,7.49,33,9.8,22.1
+Norway,Children,Female,4.79,17.8,4.6,18.7
+Norway,Adult,Male,20.93,22.1,6.5,33.2
+Norway,Adult,Female,18.10,7,2.7,27.9
