@@ -1,4 +1,4 @@
-Country,Group,Gender,Obesity Rate (%),Football (%),Basketball (%),Running (%)
+Country,Group,Gender,Obesity Rate(%),Football(%),Basketball(%),Running(%)
 United States,Children,Male,21.66,16,19,12
 United States,Children,Female,19.44,13,11.9,9.9
 United States,Adult,Male,41.64,7,9,22

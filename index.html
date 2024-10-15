@@ -20,7 +20,15 @@
   </div>
 
   <script>
-    var width = 1200, height = 800;
+    var width = 1200, height = 850;
+
+    // Função para normalizar os nomes dos países
+    function normalizeCountryName(name) {
+      if (name) {
+        return name.toLowerCase().replace(/ /g, '-'); // Converte para minúsculas e substitui espaços por hífens
+      }
+      return ''; // Retorna string vazia se o nome for indefinido
+    }
 
     // Ajustando a escala e tradução da projeção para centralizar o mapa
     var projection = d3.geoMercator()
@@ -52,38 +60,45 @@
       // Cria um dicionário com base no CSV
       var dataByCountry = {};
       csvData.forEach(function(d) {
-        dataByCountry[d.Country] = d;
+        if (d.Country) {
+          var normalizedCountryName = normalizeCountryName(d.Country);
+          dataByCountry[normalizedCountryName] = d;
+        }
       });
-
+      
       console.log("Data By Country: ", dataByCountry); // Depuração para garantir que os dados estejam corretos
 
-      // Desenha o mapa e adiciona cores com base na taxa de obesidade
       svg.selectAll("path")
         .data(countries)
         .enter().append("path")
         .attr("class", "country")
         .attr("d", path)
         .attr("fill", function(d) {
-          var countryData = dataByCountry[d.properties.name];
-          return countryData ? colorScale(countryData['Obesity Rate (%)']) : "#ccc"; // Aplica a cor ou cinza se não houver dados
+          var countryName = d.properties.admin;  // Substitua 'admin' pela chave correta após inspeção
+          var normalizedCountryName = normalizeCountryName(countryName);
+          var countryData = dataByCountry[normalizedCountryName];
+          return countryData ? colorScale(countryData['Obesity Rate(%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
         })
         .on("click", function(event, d) {
-          var countryName = d.properties.name;
-          var countryData = dataByCountry[countryName];
-          console.log("Clicked Country: ", countryName);  // Verifica qual país foi clicado
+          console.log("GeoJSON Data for Country:", d);  // Exibe o objeto inteiro do país
+          var countryName = d.properties.admin;  // Substitua 'admin' pela chave correta
+          var normalizedCountryName = normalizeCountryName(countryName);
+          var countryData = dataByCountry[normalizedCountryName];
 
           if (countryData) {
             d3.select("#details").html(`
               <h3>${countryName}</h3>
-              <p>Obesity Rate: ${countryData['Obesity Rate (%)']}%</p>
-              <p>Football Participation: ${countryData['% Football']}%</p>
-              <p>Basketball Participation: ${countryData['% Basketball']}%</p>
-              <p>Running Participation: ${countryData['% Running']}%</p>
+              <p>Obesity Rate: ${countryData['Obesity Rate(%)']}%</p>
+              <p>Football Participation: ${countryData['Football(%)']}%</p>
+              <p>Basketball Participation: ${countryData['Basketball(%)']}%</p>
+              <p>Running Participation: ${countryData['Running(%)']}%</p>
             `);
           } else {
             d3.select("#details").html(`<p>No data available for ${countryName}</p>`);
           }
         });
+
+
     }).catch(function(error) {
       console.error("Erro ao carregar os dados: ", error);
     });
