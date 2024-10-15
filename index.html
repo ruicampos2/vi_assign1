@@ -1,87 +1,92 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Menu Example</title>
-    <link rel="stylesheet" href="css/style.css">
-    <script src="https://d3js.org/d3.v6.min.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>World Map - Data Visualization</title>
+  <script src="https://d3js.org/d3.v7.min.js"></script>
+  <script src="https://d3js.org/topojson.v1.min.js"></script>
+  <style>
+    body { font-family: Arial, sans-serif; }
+    .country { stroke: #333; stroke-width: 0.5px; }
+    .active { fill: #ffcc00; }
+    #info { position: absolute; left: 20px; top: 20px; background-color: #f9f9f9; padding: 10px; border: 1px solid #ccc; }
+  </style>
 </head>
 <body>
-    <header>
-        <nav id="menu"></nav>
-    </header>
+  <div id="info">
+    <h2>Country Information</h2>
+    <div id="details">Click on a country to see data.</div>
+  </div>
 
-    <main>
-        <h2>Welcome to the Data Visualization Website</h2>
-        <p>This is a demo of a menu created using D3.js and styled to match the example you provided.</p>
-    </main>
+  <script>
+    var width = 1200, height = 800;
 
-    <footer>
-        <p>© 2024 Data Visualization Example</p>
-    </footer>
+    // Ajustando a escala e tradução da projeção para centralizar o mapa
+    var projection = d3.geoMercator()
+      .scale(150) // Aumenta a escala do mapa
+      .translate([width / 2, height / 1.5]); // Ajusta a posição do mapa mais centralizado
 
-    <script>
-        // Menu items array
-        const menuItems = ['Home', 'Sports', 'Sports', 'Team'];
+    var path = d3.geoPath().projection(projection);
 
-        // Create menu with D3.js
-        const menu = d3.select("#menu")
-            .append("ul")
-            .style("list-style-type", "none")
-            .style("display", "flex")
-            .style("justify-content", "center")
-            .style("padding", "0")
-            .style("margin", "0 auto")  // Center the menu
-            .style("width", "20%")      // Set the width of the menu
-            .style("background-color", "#333");
+    var svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height);
 
-        // Add menu items
-        menu.selectAll("li")
-            .data(menuItems)
-            .enter()
-            .append("li")
-            .style("margin", "0 20px")
-            .style("position", "relative")
-            .append("a")
-            .attr("href", "#")
-            .text(d => d)
-            .style("color", "#fff")
-            .style("text-decoration", "none")
-            .style("font-weight", "bold")
-            .style("font-family", "Arial, sans-serif")
-            .on("mouseover", function() {
-                d3.select(this)
-                  .style("color", "lightblue");
-            })
-            .on("mouseout", function() {
-                d3.select(this)
-                  .style("color", "#fff");
-            });
+    // Definir um esquema de cores para os países com base na taxa de obesidade
+    var colorScale = d3.scaleQuantize()
+      .domain([0, 50]) // Define o intervalo de dados, como taxas de obesidade
+      .range(d3.schemeBlues[9]); // Usa um esquema de cores com 9 tons de azul
 
-        // Add underline on hover (using D3 transitions)
-        menu.selectAll("li")
-            .append("div")
-            .attr("class", "underline")
-            .style("position", "absolute")
-            .style("bottom", "-5px")
-            .style("left", "0")
-            .style("width", "100%")
-            .style("height", "2px")
-            .style("background-color", "red")
-            .style("opacity", "0")
-            .style("transition", "opacity 0.3s");
+    // Carrega o mapa e os dados do CSV
+    Promise.all([
+      d3.json("https://d3js.org/world-110m.v1.json"),  // Mapa mundial
+      d3.csv("dataset/dataset.csv")               // CSV com os dados
+    ]).then(function([worldData, csvData]) {
 
-        menu.selectAll("li")
-            .on("mouseover", function() {
-                d3.select(this).select(".underline")
-                    .style("opacity", "1");
-            })
-            .on("mouseout", function() {
-                d3.select(this).select(".underline")
-                    .style("opacity", "0");
-            });
+      // Verifica se os dados CSV estão carregando corretamente
+      console.log("CSV Data Loaded: ", csvData);
+      
+      var countries = topojson.feature(worldData, worldData.objects.countries).features;
 
-    </script>
+      // Cria um dicionário com base no CSV
+      var dataByCountry = {};
+      csvData.forEach(function(d) {
+        dataByCountry[d.Country] = d;
+      });
+
+      console.log("Data By Country: ", dataByCountry); // Depuração para garantir que os dados estejam corretos
+
+      // Desenha o mapa e adiciona cores com base na taxa de obesidade
+      svg.selectAll("path")
+        .data(countries)
+        .enter().append("path")
+        .attr("class", "country")
+        .attr("d", path)
+        .attr("fill", function(d) {
+          var countryData = dataByCountry[d.properties.name];
+          return countryData ? colorScale(countryData['Obesity Rate (%)']) : "#ccc"; // Aplica a cor ou cinza se não houver dados
+        })
+        .on("click", function(event, d) {
+          var countryName = d.properties.name;
+          var countryData = dataByCountry[countryName];
+          console.log("Clicked Country: ", countryName);  // Verifica qual país foi clicado
+
+          if (countryData) {
+            d3.select("#details").html(`
+              <h3>${countryName}</h3>
+              <p>Obesity Rate: ${countryData['Obesity Rate (%)']}%</p>
+              <p>Football Participation: ${countryData['% Football']}%</p>
+              <p>Basketball Participation: ${countryData['% Basketball']}%</p>
+              <p>Running Participation: ${countryData['% Running']}%</p>
+            `);
+          } else {
+            d3.select("#details").html(`<p>No data available for ${countryName}</p>`);
+          }
+        });
+    }).catch(function(error) {
+      console.error("Erro ao carregar os dados: ", error);
+    });
+  </script>
 </body>
 </html>
