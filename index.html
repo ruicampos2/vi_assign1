@@ -57,12 +57,11 @@
       
       var countries = topojson.feature(worldData, worldData.objects.countries).features;
 
-      // Cria um dicionário com base no CSV
+      // Cria um dicionário com base no CSV usando o ISO Code como chave
       var dataByCountry = {};
       csvData.forEach(function(d) {
-        if (d.Country) {
-          var normalizedCountryName = normalizeCountryName(d.Country);
-          dataByCountry[normalizedCountryName] = d;
+        if (d['ISO Code']) {
+          dataByCountry[d['ISO Code']] = d;
         }
       });
       
@@ -74,30 +73,29 @@
         .attr("class", "country")
         .attr("d", path)
         .attr("fill", function(d) {
-          var countryName = d.properties.admin;  // Substitua 'admin' pela chave correta após inspeção
-          var normalizedCountryName = normalizeCountryName(countryName);
-          var countryData = dataByCountry[normalizedCountryName];
+          var countryCode = d.id;  // Este é o código ISO numérico do país do GeoJSON
+          var countryData = dataByCountry[countryCode];  // Busca o código ISO no CSV
+          
           return countryData ? colorScale(countryData['Obesity Rate(%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
         })
         .on("click", function(event, d) {
-          console.log("GeoJSON Data for Country:", d);  // Exibe o objeto inteiro do país
-          var countryName = d.properties.admin;  // Substitua 'admin' pela chave correta
-          var normalizedCountryName = normalizeCountryName(countryName);
-          var countryData = dataByCountry[normalizedCountryName];
-
+          var countryCode = d.id;  // Código ISO numérico do país
+          var countryData = dataByCountry[countryCode];  // Busca os dados CSV correspondentes
+          
           if (countryData) {
             d3.select("#details").html(`
-              <h3>${countryName}</h3>
+              <h3>${countryData.Country}</h3>
               <p>Obesity Rate: ${countryData['Obesity Rate(%)']}%</p>
               <p>Football Participation: ${countryData['Football(%)']}%</p>
               <p>Basketball Participation: ${countryData['Basketball(%)']}%</p>
               <p>Running Participation: ${countryData['Running(%)']}%</p>
             `);
           } else {
-            d3.select("#details").html(`<p>No data available for ${countryName}</p>`);
+            d3.select("#details").html(`<p>No data available for this country</p>`);
           }
         });
 
+      
 
     }).catch(function(error) {
       console.error("Erro ao carregar os dados: ", error);
