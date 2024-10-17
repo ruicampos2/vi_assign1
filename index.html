@@ -3,30 +3,38 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>World Map - Data Visualization with Zoom</title>
+  <title>World Map - Data Visualization</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v1.min.js"></script>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; padding: 0; overflow: hidden; }
     .country { stroke: #333; stroke-width: 0.5px; }
     .active { fill: #ffcc00; }
-    #info { 
-      position: absolute; 
-      left: 20px; 
-      top: 20px; 
-      background-color: #f9f9f9; 
-      padding: 10px; 
-      border: 1px solid #ccc; 
-      z-index: 10; /* Mantém o painel sempre visível */
+    .popup {
+      position: absolute;
+      background-color: rgba(255, 255, 255, 0.9);
+      border-radius: 8px;
+      box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 10px;
+      font-size: 14px;
+      display: none;
+      z-index: 10;
     }
-    svg { width: 100vw; height: 100vh; }
+    .popup h3 {
+      margin: 0;
+      font-size: 16px;
+    }
+    .popup p {
+      margin: 5px 0;
+    }
+    svg {
+      display: block;
+    }
   </style>
 </head>
 <body>
-  <div id="info">
-    <h2>Country Information</h2>
-    <div id="details">Click on a country to see data.</div>
-  </div>
+
+  <div id="popup" class="popup"></div>
 
   <script>
     var width = window.innerWidth, height = window.innerHeight;
@@ -41,28 +49,19 @@
 
     // Ajustando a escala e tradução da projeção para centralizar o mapa
     var projection = d3.geoMercator()
-      .scale(150)
-      .translate([width / 2, height / 1.5]);
+      .scale(200) // Aumenta a escala do mapa para preencher a tela
+      .translate([width / 2, height / 1.5]); // Ajusta a posição do mapa mais centralizado
 
     var path = d3.geoPath().projection(projection);
 
-    var svg = d3.select("body").append("svg");
-
-    // Criar o grupo onde os países serão adicionados
-    var g = svg.append("g");
-
-    // Adiciona comportamento de zoom e pan
-    svg.call(d3.zoom()
-      .scaleExtent([1, 8]) // Define os limites de zoom
-      .on("zoom", function(event) {
-        g.attr("transform", event.transform); // Aplica a transformação de zoom e pan ao grupo
-      })
-    );
+    var svg = d3.select("body").append("svg")
+      .attr("width", width)
+      .attr("height", height);
 
     // Definir um esquema de cores para os países com base na taxa de obesidade
     var colorScale = d3.scaleQuantize()
-      .domain([0, 50])
-      .range(d3.schemeBlues[9]);
+      .domain([0, 50]) // Define o intervalo de dados, como taxas de obesidade
+      .range(d3.schemeBlues[9]); // Usa um esquema de cores com 9 tons de azul
 
     // Carrega o mapa e os dados do CSV
     Promise.all([
@@ -70,44 +69,69 @@
       d3.csv("dataset/dataset.csv")               // CSV com os dados
     ]).then(function([worldData, csvData]) {
 
+      // Verifica se os dados CSV estão carregando corretamente
+      console.log("CSV Data Loaded: ", csvData);
+      
       var countries = topojson.feature(worldData, worldData.objects.countries).features;
 
       // Cria um dicionário com base no CSV usando o ISO Code como chave
       var dataByCountry = {};
       csvData.forEach(function(d) {
         if (d['ISO Code']) {
-          dataByCountry[d['ISO Code']] = d;
+          if (!dataByCountry[d['ISO Code']]) {
+            dataByCountry[d['ISO Code']] = { children: {}, adult: {} };
+          }
+          dataByCountry[d['ISO Code']][d.Group.toLowerCase()][d.Gender.toLowerCase()] = d;
         }
       });
+      
+      console.log("Data By Country: ", dataByCountry); // Depuração para garantir que os dados estejam corretos
 
-      // Desenha o mapa e aplica cores com base na taxa de obesidade
-      g.selectAll("path")
+      svg.selectAll("path")
         .data(countries)
         .enter().append("path")
         .attr("class", "country")
         .attr("d", path)
         .attr("fill", function(d) {
-          var countryCode = d.id;  // Código ISO numérico do país
-          var countryData = dataByCountry[countryCode];
-          return countryData ? colorScale(countryData['Obesity Rate(%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
+          var countryCode = d.id;  // Este é o código ISO numérico do país do GeoJSON
+          var countryData = dataByCountry[countryCode];  // Busca o código ISO no CSV
+          
+          return countryData ? colorScale(countryData.adult.male['Obesity Rate(%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
         })
         .on("click", function(event, d) {
-          var countryCode = d.id;
-          var countryData = dataByCountry[countryCode];
+          var countryCode = d.id;  // Código ISO numérico do país
+          var countryData = dataByCountry[countryCode];  // Busca os dados CSV correspondentes
 
           if (countryData) {
-            d3.select("#details").html(`
-              <h3>${countryData.Country}</h3>
-              <p>Obesity Rate: ${countryData['Obesity Rate(%)']}%</p>
-              <p>Football Participation: ${countryData['Football(%)']}%</p>
-              <p>Basketball Participation: ${countryData['Basketball(%)']}%</p>
-              <p>Running Participation: ${countryData['Running(%)']}%</p>
-            `);
-          } else {
-            d3.select("#details").html(`<p>No data available for this country</p>`);
+            var popup = d3.select("#popup");
+            popup.style("left", (event.pageX + 10) + "px")
+                 .style("top", (event.pageY - 50) + "px")
+                 .style("display", "block")
+                 .html(`
+                   <h3>${countryData.adult.male.Country}</h3>
+                   <p><strong>Children - Male:</strong> Football: ${countryData.children.male['Football(%)']}%, Basketball: ${countryData.children.male['Basketball(%)']}%, Running: ${countryData.children.male['Running(%)']}%</p>
+                   <p><strong>Children - Female:</strong> Football: ${countryData.children.female['Football(%)']}%, Basketball: ${countryData.children.female['Basketball(%)']}%, Running: ${countryData.children.female['Running(%)']}%</p>
+                   <p><strong>Adult - Male:</strong> Football: ${countryData.adult.male['Football(%)']}%, Basketball: ${countryData.adult.male['Basketball(%)']}%, Running: ${countryData.adult.male['Running(%)']}%</p>
+                   <p><strong>Adult - Female:</strong> Football: ${countryData.adult.female['Football(%)']}%, Basketball: ${countryData.adult.female['Basketball(%)']}%, Running: ${countryData.adult.female['Running(%)']}%</p>
+                   <p><strong>Obesity Rate (Children - Male):</strong> ${countryData.children.male['Obesity Rate(%)']}%</p>
+                   <p><strong>Obesity Rate (Children - Female):</strong> ${countryData.children.female['Obesity Rate(%)']}%</p>
+                   <p><strong>Obesity Rate (Adult - Male):</strong> ${countryData.adult.male['Obesity Rate(%)']}%</p>
+                   <p><strong>Obesity Rate (Adult - Female):</strong> ${countryData.adult.female['Obesity Rate(%)']}%</p>
+                 `);
           }
+        })
+        .on("mouseleave", function() {
+          d3.select("#popup").style("display", "none");  // Esconde o pop-up ao sair
         });
 
+      // Adiciona a funcionalidade de zoom e panning
+      var zoom = d3.zoom()
+        .scaleExtent([1, 8])  // Limita o nível de zoom
+        .on("zoom", function(event) {
+          svg.selectAll("path").attr("transform", event.transform);
+        });
+
+      svg.call(zoom);
     }).catch(function(error) {
       console.error("Erro ao carregar os dados: ", error);
     });
