@@ -3,14 +3,23 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>World Map - Data Visualization</title>
+  <title>World Map - Data Visualization with Zoom</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://d3js.org/topojson.v1.min.js"></script>
   <style>
-    body { font-family: Arial, sans-serif; }
+    body { font-family: Arial, sans-serif; margin: 0; padding: 0; overflow: hidden; }
     .country { stroke: #333; stroke-width: 0.5px; }
     .active { fill: #ffcc00; }
-    #info { position: absolute; left: 20px; top: 20px; background-color: #f9f9f9; padding: 10px; border: 1px solid #ccc; }
+    #info { 
+      position: absolute; 
+      left: 20px; 
+      top: 20px; 
+      background-color: #f9f9f9; 
+      padding: 10px; 
+      border: 1px solid #ccc; 
+      z-index: 10; /* Mantém o painel sempre visível */
+    }
+    svg { width: 100vw; height: 100vh; }
   </style>
 </head>
 <body>
@@ -20,7 +29,7 @@
   </div>
 
   <script>
-    var width = 1200, height = 850;
+    var width = window.innerWidth, height = window.innerHeight;
 
     // Função para normalizar os nomes dos países
     function normalizeCountryName(name) {
@@ -32,19 +41,28 @@
 
     // Ajustando a escala e tradução da projeção para centralizar o mapa
     var projection = d3.geoMercator()
-      .scale(150) // Aumenta a escala do mapa
-      .translate([width / 2, height / 1.5]); // Ajusta a posição do mapa mais centralizado
+      .scale(150)
+      .translate([width / 2, height / 1.5]);
 
     var path = d3.geoPath().projection(projection);
 
-    var svg = d3.select("body").append("svg")
-      .attr("width", width)
-      .attr("height", height);
+    var svg = d3.select("body").append("svg");
+
+    // Criar o grupo onde os países serão adicionados
+    var g = svg.append("g");
+
+    // Adiciona comportamento de zoom e pan
+    svg.call(d3.zoom()
+      .scaleExtent([1, 8]) // Define os limites de zoom
+      .on("zoom", function(event) {
+        g.attr("transform", event.transform); // Aplica a transformação de zoom e pan ao grupo
+      })
+    );
 
     // Definir um esquema de cores para os países com base na taxa de obesidade
     var colorScale = d3.scaleQuantize()
-      .domain([0, 50]) // Define o intervalo de dados, como taxas de obesidade
-      .range(d3.schemeBlues[9]); // Usa um esquema de cores com 9 tons de azul
+      .domain([0, 50])
+      .range(d3.schemeBlues[9]);
 
     // Carrega o mapa e os dados do CSV
     Promise.all([
@@ -52,9 +70,6 @@
       d3.csv("dataset/dataset.csv")               // CSV com os dados
     ]).then(function([worldData, csvData]) {
 
-      // Verifica se os dados CSV estão carregando corretamente
-      console.log("CSV Data Loaded: ", csvData);
-      
       var countries = topojson.feature(worldData, worldData.objects.countries).features;
 
       // Cria um dicionário com base no CSV usando o ISO Code como chave
@@ -64,24 +79,22 @@
           dataByCountry[d['ISO Code']] = d;
         }
       });
-      
-      console.log("Data By Country: ", dataByCountry); // Depuração para garantir que os dados estejam corretos
 
-      svg.selectAll("path")
+      // Desenha o mapa e aplica cores com base na taxa de obesidade
+      g.selectAll("path")
         .data(countries)
         .enter().append("path")
         .attr("class", "country")
         .attr("d", path)
         .attr("fill", function(d) {
-          var countryCode = d.id;  // Este é o código ISO numérico do país do GeoJSON
-          var countryData = dataByCountry[countryCode];  // Busca o código ISO no CSV
-          
+          var countryCode = d.id;  // Código ISO numérico do país
+          var countryData = dataByCountry[countryCode];
           return countryData ? colorScale(countryData['Obesity Rate(%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
         })
         .on("click", function(event, d) {
-          var countryCode = d.id;  // Código ISO numérico do país
-          var countryData = dataByCountry[countryCode];  // Busca os dados CSV correspondentes
-          
+          var countryCode = d.id;
+          var countryData = dataByCountry[countryCode];
+
           if (countryData) {
             d3.select("#details").html(`
               <h3>${countryData.Country}</h3>
@@ -94,8 +107,6 @@
             d3.select("#details").html(`<p>No data available for this country</p>`);
           }
         });
-
-      
 
     }).catch(function(error) {
       console.error("Erro ao carregar os dados: ", error);
