@@ -30,14 +30,37 @@
     svg {
       display: block;
     }
+    .navbar {
+      display: flex;
+      justify-content: space-between;
+      background-color: #333;
+      padding: 10px;
+    }
+    .navbar button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    .navbar button:hover {
+      background-color: #45a049;
+    }
   </style>
 </head>
 <body>
+
+  <div class="navbar">
+    <button id="maleBtn">Male</button>
+    <button id="femaleBtn">Female</button>
+  </div>
 
   <div id="popup" class="popup"></div>
 
   <script>
     var width = window.innerWidth, height = window.innerHeight;
+    var selectedGender = 'male';  // Variável para manter o gênero selecionado (inicialmente 'male')
 
     // Função para normalizar os nomes dos países
     function normalizeCountryName(name) {
@@ -45,6 +68,11 @@
         return name.toLowerCase().replace(/ /g, '-'); // Converte para minúsculas e substitui espaços por hífens
       }
       return ''; // Retorna string vazia se o nome for indefinido
+    }
+
+    // Função para mudar o gênero selecionado
+    function updateSelectedGender(gender) {
+      selectedGender = gender;
     }
 
     // Ajustando a escala e tradução da projeção para centralizar o mapa
@@ -96,7 +124,7 @@
           var countryCode = d.id;  // Este é o código ISO numérico do país do GeoJSON
           var countryData = dataByCountry[countryCode];  // Busca o código ISO no CSV
           
-          return countryData ? colorScale(countryData.adult.male['Obesity Rate(%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
+          return countryData ? colorScale(countryData.adult[selectedGender]['Obesity Rate(%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
         })
         .on("click", function(event, d) {
           var countryCode = d.id;  // Código ISO numérico do país
@@ -135,6 +163,23 @@
     }).catch(function(error) {
       console.error("Erro ao carregar os dados: ", error);
     });
+
+    // Funções auxiliares
+    function capitalizeFirstLetter(string) {
+      return string.charAt(0).toUpperCase() + string.slice(1);
+    }
+
+    // Eventos para mudar entre "Male" e "Female"
+    d3.select("#maleBtn").on("click", function() {
+      updateSelectedGender('male');
+      location.reload();  // Recarrega o mapa com o gênero masculino
+    });
+
+    d3.select("#femaleBtn").on("click", function() {
+      updateSelectedGender('female');
+      location.reload();  // Recarrega o mapa com o gênero feminino
+    });
+
   </script>
 </body>
 </html>
