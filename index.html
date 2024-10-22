@@ -62,19 +62,6 @@
     var width = window.innerWidth, height = window.innerHeight;
     var selectedGender = 'male';  // Variável para manter o gênero selecionado (inicialmente 'male')
 
-    // Função para normalizar os nomes dos países
-    function normalizeCountryName(name) {
-      if (name) {
-        return name.toLowerCase().replace(/ /g, '-'); // Converte para minúsculas e substitui espaços por hífens
-      }
-      return ''; // Retorna string vazia se o nome for indefinido
-    }
-
-    // Função para mudar o gênero selecionado
-    function updateSelectedGender(gender) {
-      selectedGender = gender;
-    }
-
     // Ajustando a escala e tradução da projeção para centralizar o mapa
     var projection = d3.geoMercator()
       .scale(200) // Aumenta a escala do mapa para preencher a tela
@@ -97,7 +84,6 @@
       d3.csv("dataset/dataset.csv")               // CSV com os dados
     ]).then(function([worldData, csvData]) {
 
-      // Verifica se os dados CSV estão carregando corretamente
       console.log("CSV Data Loaded: ", csvData);
       
       var countries = topojson.feature(worldData, worldData.objects.countries).features;
@@ -124,7 +110,7 @@
           var countryCode = d.id;  // Este é o código ISO numérico do país do GeoJSON
           var countryData = dataByCountry[countryCode];  // Busca o código ISO no CSV
           
-          return countryData ? colorScale(countryData.adult[selectedGender]['Obesity Rate(%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
+          return countryData ? colorScale(countryData.adult[selectedGender]['Obesity Rate (%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
         })
         .on("click", function(event, d) {
           var countryCode = d.id;  // Código ISO numérico do país
@@ -132,19 +118,32 @@
 
           if (countryData) {
             var popup = d3.select("#popup");
+
+            // Verificações para evitar 'undefined'
+            var footballMale = countryData.children.male['Football (%)'] || 'N/A';
+            var basketballMale = countryData.children.male['Basketball (%)'] || 'N/A';
+            var runningMale = countryData.children.male['Running (%)'] || 'N/A';
+
+            var footballFemale = countryData.children.female['Football (%)'] || 'N/A';
+            var basketballFemale = countryData.children.female['Basketball (%)'] || 'N/A';
+            var runningFemale = countryData.children.female['Running (%)'] || 'N/A';
+
+            var obesityMale = countryData.adult.male['Obesity Rate (%)'] || 'N/A';
+            var obesityFemale = countryData.adult.female['Obesity Rate (%)'] || 'N/A';
+
             popup.style("left", (event.pageX + 10) + "px")
                  .style("top", (event.pageY - 50) + "px")
                  .style("display", "block")
                  .html(`
                    <h3>${countryData.adult.male.Country}</h3>
-                   <p><strong>Children - Male:</strong> Football: ${countryData.children.male['Football(%)']}%, Basketball: ${countryData.children.male['Basketball(%)']}%, Running: ${countryData.children.male['Running(%)']}%</p>
-                   <p><strong>Children - Female:</strong> Football: ${countryData.children.female['Football(%)']}%, Basketball: ${countryData.children.female['Basketball(%)']}%, Running: ${countryData.children.female['Running(%)']}%</p>
-                   <p><strong>Adult - Male:</strong> Football: ${countryData.adult.male['Football(%)']}%, Basketball: ${countryData.adult.male['Basketball(%)']}%, Running: ${countryData.adult.male['Running(%)']}%</p>
-                   <p><strong>Adult - Female:</strong> Football: ${countryData.adult.female['Football(%)']}%, Basketball: ${countryData.adult.female['Basketball(%)']}%, Running: ${countryData.adult.female['Running(%)']}%</p>
-                   <p><strong>Obesity Rate (Children - Male):</strong> ${countryData.children.male['Obesity Rate(%)']}%</p>
-                   <p><strong>Obesity Rate (Children - Female):</strong> ${countryData.children.female['Obesity Rate(%)']}%</p>
-                   <p><strong>Obesity Rate (Adult - Male):</strong> ${countryData.adult.male['Obesity Rate(%)']}%</p>
-                   <p><strong>Obesity Rate (Adult - Female):</strong> ${countryData.adult.female['Obesity Rate(%)']}%</p>
+                   <p><strong>Children - Male:</strong> Football: ${footballMale}%, Basketball: ${basketballMale}%, Running: ${runningMale}%</p>
+                   <p><strong>Children - Female:</strong> Football: ${footballFemale}%, Basketball: ${basketballFemale}%, Running: ${runningFemale}%</p>
+                   <p><strong>Adult - Male:</strong> Football: ${countryData.adult.male['Football (%)']}%, Basketball: ${countryData.adult.male['Basketball (%)']}%, Running: ${countryData.adult.male['Running (%)']}%</p>
+                   <p><strong>Adult - Female:</strong> Football: ${countryData.adult.female['Football (%)']}%, Basketball: ${countryData.adult.female['Basketball (%)']}%, Running: ${countryData.adult.female['Running (%)']}%</p>
+                   <p><strong>Obesity Rate (Children - Male):</strong> ${countryData.children.male['Obesity Rate (%)']}%</p>
+                   <p><strong>Obesity Rate (Children - Female):</strong> ${countryData.children.female['Obesity Rate (%)']}%</p>
+                   <p><strong>Obesity Rate (Adult - Male):</strong> ${obesityMale}%</p>
+                   <p><strong>Obesity Rate (Adult - Female):</strong> ${obesityFemale}%</p>
                  `);
           }
         })
@@ -164,20 +163,24 @@
       console.error("Erro ao carregar os dados: ", error);
     });
 
-    // Funções auxiliares
-    function capitalizeFirstLetter(string) {
-      return string.charAt(0).toUpperCase() + string.slice(1);
+    // Função para atualizar as cores com base no gênero selecionado
+    function updateMapWithGender(gender) {
+      svg.selectAll("path").attr("fill", function(d) {
+        var countryCode = d.id;  // Código ISO numérico do país
+        var countryData = dataByCountry[countryCode];
+        return countryData ? colorScale(countryData.adult[gender]['Obesity Rate (%)']) : "#ccc";
+      });
     }
 
-    // Eventos para mudar entre "Male" e "Female"
+    // Eventos para mudar entre "Male" e "Female" sem recarregar a página
     d3.select("#maleBtn").on("click", function() {
       updateSelectedGender('male');
-      location.reload();  // Recarrega o mapa com o gênero masculino
+      updateMapWithGender('male');
     });
 
     d3.select("#femaleBtn").on("click", function() {
       updateSelectedGender('female');
-      location.reload();  // Recarrega o mapa com o gênero feminino
+      updateMapWithGender('female');
     });
 
   </script>
