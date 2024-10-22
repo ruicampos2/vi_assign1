@@ -107,8 +107,9 @@
         .attr("class", "country")
         .attr("d", path)
         .attr("fill", function(d) {
-          var countryCode = d.id;  // Código ISO numérico do país
+          var countryCode = d.id;  // Este é o código ISO numérico do país do GeoJSON
           var countryData = dataByCountry[countryCode];  // Busca o código ISO no CSV
+          
           return countryData ? colorScale(countryData.adult[selectedGender]['Obesity Rate (%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
         })
         .on("click", function(event, d) {
