@@ -32,7 +32,7 @@
     }
     .navbar {
       display: flex;
-      justify-content: space-between;
+      justify-content: center; /* Centraliza os botões */
       background-color: #333;
       padding: 10px;
     }
@@ -43,6 +43,7 @@
       padding: 10px 20px;
       font-size: 16px;
       cursor: pointer;
+      margin: 0 5px; /* Espaçamento entre os botões */
     }
     .navbar button:hover {
       background-color: #45a049;
@@ -52,15 +53,14 @@
 <body>
 
   <div class="navbar">
-    <button id="maleBtn">Male</button>
-    <button id="femaleBtn">Female</button>
+    <button id="globalMapBtn" onclick="window.location.href='index.html'">Mapa Global</button>
+    <button id="compareBtn" onclick="window.location.href='compare.html'">Comparar</button>
   </div>
 
   <div id="popup" class="popup"></div>
 
   <script>
     var width = window.innerWidth, height = window.innerHeight;
-    var selectedGender = 'male';  // Variável para manter o gênero selecionado (inicialmente 'male')
 
     // Ajustando a escala e tradução da projeção para centralizar o mapa
     var projection = d3.geoMercator()
@@ -109,7 +109,7 @@
         .attr("fill", function(d) {
           var countryCode = d.id;  // Código ISO numérico do país
           var countryData = dataByCountry[countryCode];  // Busca o código ISO no CSV
-          return countryData ? colorScale(countryData.adult[selectedGender]['Obesity Rate (%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
+          return countryData ? colorScale(countryData.adult['male']['Obesity Rate (%)']) : "#ccc";  // Aplica a cor ou cinza se não houver dados
         })
         .on("click", function(event, d) {
           var countryCode = d.id;  // Código ISO numérico do país
@@ -161,27 +161,6 @@
     }).catch(function(error) {
       console.error("Erro ao carregar os dados: ", error);
     });
-
-    // Função para atualizar as cores com base no gênero selecionado
-    function updateMapWithGender(gender) {
-      svg.selectAll("path").attr("fill", function(d) {
-        var countryCode = d.id;  // Código ISO numérico do país
-        var countryData = dataByCountry[countryCode];
-        return countryData ? colorScale(countryData.adult[gender]['Obesity Rate (%)']) : "#ccc";
-      });
-    }
-
-    // Eventos para mudar entre "Male" e "Female" sem recarregar a página
-    d3.select("#maleBtn").on("click", function() {
-      updateSelectedGender('male');
-      updateMapWithGender('male');
-    });
-
-    d3.select("#femaleBtn").on("click", function() {
-      updateSelectedGender('female');
-      updateMapWithGender('female');
-    });
-
   </script>
 </body>
 </html>
