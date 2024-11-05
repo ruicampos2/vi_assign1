@@ -1,17 +1,24 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Comparar Países - Dados de Esportes e Obesidade</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+
     .navbar {
       display: flex;
       justify-content: center;
       background-color: #333;
       padding: 10px;
     }
+
     .navbar button {
       background-color: #4CAF50;
       color: white;
@@ -21,15 +28,18 @@
       cursor: pointer;
       margin: 0 5px;
     }
+
     .navbar button:hover {
       background-color: #45a049;
     }
+
     .content {
       padding: 20px;
       display: flex;
       flex-direction: column;
       align-items: center;
     }
+
     .selection-container {
       display: flex;
       justify-content: space-around;
@@ -37,15 +47,18 @@
       max-width: 900px;
       margin-top: 20px;
     }
+
     .selection-group {
       border: 1px solid #ddd;
       padding: 15px;
       border-radius: 8px;
       min-width: 200px;
     }
+
     h1 {
       text-align: center;
     }
+
     .chart-container {
       display: flex;
       flex-wrap: wrap;
@@ -53,6 +66,7 @@
       gap: 20px;
       margin-top: 30px;
     }
+
     .chart {
       width: 45%;
       min-width: 300px;
@@ -61,10 +75,12 @@
       box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
       padding: 15px;
     }
+
     .country-list {
       column-count: 2;
       column-gap: 20px;
     }
+
     .generate-button {
       background-color: #007bff;
       color: white;
@@ -75,11 +91,73 @@
       border-radius: 5px;
       margin-top: 20px;
     }
+
     .generate-button:hover {
       background-color: #0056b3;
     }
+
+    .dropdown {
+      position: relative;
+      display: inline-block;
+      width: 100%;
+    }
+
+    /* Estilos do dropdown customizado */
+    .dropdown-content {
+      display: none;
+      position: absolute;
+      background-color: #f9f9f9;
+      border: 1px solid #ddd;
+      border-radius: 5px;
+      width: 100%;
+      max-height: 200px;
+      overflow-y: auto;
+      z-index: 1;
+    }
+
+    /* Exibe o dropdown ao clicar */
+    .dropdown.show .dropdown-content {
+      display: block;
+    }
+
+    .dropdown-content label {
+      display: block;
+      padding: 8px;
+      cursor: pointer;
+    }
+
+    .dropdown-content label:hover {
+      background-color: #e9e9e9;
+    }
+
+    /* Estilos para as tags de seleção abaixo do dropdown */
+    .selected-tags {
+      display: flex;
+      flex-wrap: wrap;
+      margin-top: 10px;
+      gap: 5px;
+    }
+
+    .selected-tag {
+      background-color: #007bff;
+      color: white;
+      padding: 5px 10px;
+      border-radius: 15px;
+      display: flex;
+      align-items: center;
+      width: 132px; /* Define uma largura fixa */
+      justify-content: space-between; /* Espalha o texto e o botão "X" */
+    }
+
+    .selected-tag .remove-btn {
+      margin-left: 8px;
+      color: white;
+      cursor: pointer;
+      font-weight: bold;
+    }
   </style>
 </head>
+
 <body>
 
   <!-- Barra de navegação -->
@@ -90,12 +168,13 @@
   <!-- Conteúdo principal -->
   <div class="content">
     <h1>Comparar Países - Desportos e Obesidade</h1>
-    <p>Selecione os países, faixas etárias e gêneros que deseja comparar para visualizar as diferenças em participação em desportos e taxas de obesidade.</p>
+    <p>Selecione os países, faixas etárias e gêneros que deseja comparar para visualizar as diferenças em participação
+      em desportos e taxas de obesidade</p>
 
     <!-- Contêiner de seleção -->
     <div class="selection-container">
       <!-- Seleção de Países -->
-      <div class="selection-group country-list">
+      <!-- <div class="selection-group country-list">
         <h3>Países</h3>
         <label><input type="checkbox" value="United States"> United States</label><br>
         <label><input type="checkbox" value="Brazil"> Brazil</label><br>
@@ -131,8 +210,26 @@
         <label><input type="checkbox" value="Colombia"> Colombia</label><br>
         <label><input type="checkbox" value="Peru"> Peru</label><br>
         <label><input type="checkbox" value="Canada"> Canada</label><br>
-        <!-- Adicione outros países conforme necessário -->
+      </div> -->
+
+      <div class="dropdown">
+        <button onclick="toggleDropdown()">Países Selecionados</button>
+        <div class="dropdown-content" id="dropdown-content">
+          <label><input type="checkbox" value="United States" onchange="selectCountry(this)"> United States</label>
+          <label><input type="checkbox" value="Brazil" onchange="selectCountry(this)"> Brazil</label>
+          <label><input type="checkbox" value="Germany" onchange="selectCountry(this)"> Germany</label>
+          <label><input type="checkbox" value="India" onchange="selectCountry(this)"> India</label>
+          <label><input type="checkbox" value="Canada" onchange="selectCountry(this)"> Canada</label>
+          <label><input type="checkbox" value="Australia" onchange="selectCountry(this)"> Australia</label>
+          <label><input type="checkbox" value="Nigeria" onchange="selectCountry(this)"> Nigeria</label>
+          <label><input type="checkbox" value="China" onchange="selectCountry(this)"> China</label>
+          <label><input type="checkbox" value="United Kingdom" onchange="selectCountry(this)"> United Kingdom</label>
+          <label><input type="checkbox" value="Japan" onchange="selectCountry(this)"> Japan</label>
+          <!-- Adicione outros países conforme necessário -->
+        </div>
+        <div class="selected-tags" id="selected-tags"></div>
       </div>
+
 
       <!-- Seleção de Gênero, Faixa Etária e Métricas -->
       <div class="selection-group">
@@ -178,7 +275,7 @@
       // Limpar os gráficos existentes antes de criar novos
       document.getElementById('chart1').remove();
       document.getElementById('chart2').remove();
-      
+
       // Recriar os canvas para novos gráficos
       const chartContainer = document.querySelector('.chart-container');
       chartContainer.innerHTML = `
@@ -233,7 +330,56 @@
         });
       }
     }
+
+
+    // Abre/fecha o dropdown ao clicar
+    function toggleDropdown() {
+      document.querySelector(".dropdown").classList.toggle("show");
+    }
+
+    // Fecha o dropdown se o usuário clicar fora dele
+    window.onclick = function (event) {
+      if (!event.target.matches('.dropdown button')) {
+        document.querySelector(".dropdown").classList.remove("show");
+      }
+    };
+
+    // Seleciona ou deseleciona um país e o exibe/remova das tags
+    function selectCountry(checkbox) {
+      const country = checkbox.value;
+      if (checkbox.checked) {
+        addTag(country);
+      } else {
+        removeTag(country);
+      }
+    }
+
+    // Adiciona uma tag para o país selecionado
+    function addTag(country) {
+      const selectedTags = document.getElementById("selected-tags");
+
+      // Verifica se o país já foi adicionado
+      if (document.getElementById("tag-" + country)) return;
+
+      const tag = document.createElement("div");
+      tag.classList.add("selected-tag");
+      tag.id = "tag-" + country;
+      tag.innerHTML = `${country} <span class="remove-btn" onclick="removeTag('${country}')">&times;</span>`;
+      selectedTags.appendChild(tag);
+    }
+
+    // Remove a tag do país e desmarca o checkbox no dropdown
+    function removeTag(country) {
+      const tag = document.getElementById("tag-" + country);
+      if (tag) tag.remove();
+
+      const checkbox = Array.from(document.querySelectorAll("#dropdown-content input")).find(el => el.value === country);
+      if (checkbox) checkbox.checked = false;
+    }
+
+    
   </script>
 
 </body>
+
 </html>

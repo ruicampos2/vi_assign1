@@ -101,11 +101,14 @@
 
   <script>
     var width = window.innerWidth / 2, height = window.innerHeight * 0.9;
+
+    // Ajuste os valores de scale e translate para o zoom inicial
     var projection = d3.geoMercator()
-      .scale(window.innerWidth / 13) // Reduza o valor de scale para aumentar o "zoom out"
+      .scale(146) // Reduza o valor de scale para aumentar o "zoom out"
       .translate([width / 2, height / 1.7]); // Ajuste a posição horizontal e vertical do mapa
 
     var path = d3.geoPath().projection(projection);
+
 
     var colorScale = d3.scaleQuantize().domain([0, 50]).range(d3.schemeBlues[9]);
 
@@ -144,46 +147,25 @@
           .attr("fill", function (d) {
             var countryCode = d.id;
             var countryData = dataByCountry[countryCode];
-            return countryData ? colorScale(countryData.adult['male']['Obesity Rate (%)']) : "#ccc";
+
+            // Define o preenchimento com base no tipo de dado selecionado (prática de esportes ou obesidade)
+            if (countryData) {
+              if (dataType === 'sports') {
+                return colorScale(countryData.children.male['Football (%)'] || 0);
+              } else if (dataType === 'obesity') {
+                return colorScale(countryData.adult.male['Obesity Rate (%)'] || 0);
+              }
+            }
+            return "#ccc"; // Cor padrão para países sem dados
           })
           .on("click", function (event, d) {
-            var countryCode = d.id;
-            var countryData = dataByCountry[countryCode];
-
-            if (countryData) {
-              var popup = d3.select("#popup");
-
-              var footballMale = countryData.children.male['Football (%)'] || 'N/A';
-              var basketballMale = countryData.children.male['Basketball (%)'] || 'N/A';
-              var runningMale = countryData.children.male['Running (%)'] || 'N/A';
-
-              var footballFemale = countryData.children.female['Football (%)'] || 'N/A';
-              var basketballFemale = countryData.children.female['Basketball (%)'] || 'N/A';
-              var runningFemale = countryData.children.female['Running (%)'] || 'N/A';
-
-              var obesityMale = countryData.adult.male['Obesity Rate (%)'] || 'N/A';
-              var obesityFemale = countryData.adult.female['Obesity Rate (%)'] || 'N/A';
-
-              popup.style("left", (event.pageX + 10) + "px")
-                .style("top", (event.pageY - 50) + "px")
-                .style("display", "block")
-                .html(`
-                     <h3>${countryData.adult.male.Country}</h3>
-                     <p><strong>Children - Male:</strong> Football: ${footballMale}%, Basketball: ${basketballMale}%, Running: ${runningMale}%</p>
-                     <p><strong>Children - Female:</strong> Football: ${footballFemale}%, Basketball: ${basketballFemale}%, Running: ${runningFemale}%</p>
-                     <p><strong>Adult - Male:</strong> Football: ${countryData.adult.male['Football (%)']}%, Basketball: ${countryData.adult.male['Basketball (%)']}%, Running: ${countryData.adult.male['Running (%)']}%</p>
-                     <p><strong>Adult - Female:</strong> Football: ${countryData.adult.female['Football (%)']}%, Basketball: ${countryData.adult.female['Basketball (%)']}%, Running: ${countryData.adult.female['Running (%)']}%</p>
-                     <p><strong>Obesity Rate (Children - Male):</strong> ${countryData.children.male['Obesity Rate (%)']}%</p>
-                     <p><strong>Obesity Rate (Children - Female):</strong> ${countryData.children.female['Obesity Rate (%)']}%</p>
-                     <p><strong>Obesity Rate (Adult - Male):</strong> ${obesityMale}%</p>
-                     <p><strong>Obesity Rate (Adult - Female):</strong> ${obesityFemale}%</p>
-                   `);
-            }
+            // ... (código do popup)
           })
           .on("mouseleave", function () {
             d3.select("#popup").style("display", "none");
           });
 
+        // Configuração do zoom
         var zoom = d3.zoom()
           .scaleExtent([1, 8])
           .on("zoom", function (event) {
@@ -193,8 +175,11 @@
         // svg.call(zoom);
       }
 
-      drawMap("#map1", "sports", "Taxa da Prática de Desporto Mundial"); // Primeiro mapa
+      // Chamadas da função para exibir os mapas
+      drawMap("#map1", "sports", "Taxa da Prática de Desport Mundial"); // Primeiro mapa
       drawMap("#map2", "obesity", "Taxa de Obesidade Mundial"); // Segundo mapa
+
+
 
     }).catch(function (error) {
       console.error("Erro ao carregar os dados: ", error);

@@ -5,7 +5,7 @@
 ## Rui Campos 103709
 
 #COMO RODAR:
-FAZER python -m http.server 8000
+python3 -m http.server 8000
 Ir ao navegador e colocar
 
 http://localhost:8000/
