@@ -145,8 +145,10 @@
       border-radius: 15px;
       display: flex;
       align-items: center;
-      width: 132px; /* Define uma largura fixa */
-      justify-content: space-between; /* Espalha o texto e o botão "X" */
+      width: 132px;
+      /* Define uma largura fixa */
+      justify-content: space-between;
+      /* Espalha o texto e o botão "X" */
     }
 
     .selected-tag .remove-btn {
@@ -263,7 +265,7 @@
   <script>
     function generateCharts() {
       // Selecionar os valores das checkboxes selecionadas
-      const selectedCountries = Array.from(document.querySelectorAll('.country-list input:checked')).map(el => el.value);
+      const selectedCountries = Array.from(document.querySelectorAll('.selected-tag')).map(el => el.id.replace("tag-", ""));
       const selectedMetrics = Array.from(document.querySelectorAll('.metric:checked')).map(el => el.value);
 
       // Verificar se todas as categorias têm seleções
@@ -377,7 +379,7 @@
       if (checkbox) checkbox.checked = false;
     }
 
-    
+
   </script>
 
 </body>
