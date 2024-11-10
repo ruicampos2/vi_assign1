@@ -7,9 +7,11 @@ document.addEventListener('DOMContentLoaded', function () {
     Promise.all([
         d3.json("https://d3js.org/world-110m.v1.json"),
         d3.csv("dataset/dataset.csv")
+        
     ]).then(function ([worldData, csvData]) {
         var countries = topojson.feature(worldData, worldData.objects.countries).features;
         dataByCountry = {};
+        console.log("Estrutura de dataByCountry:", dataByCountry);
 
         // Organizar os dados CSV por país, grupo e gênero
         csvData.forEach(function (d) {
@@ -25,56 +27,62 @@ document.addEventListener('DOMContentLoaded', function () {
         var dropdownContent = d3.select("#dropdown-content");
         countries.forEach(function (country) {
             var countryName = country.properties.name;
-            dropdownContent.append("label")
-                .append("input")
-                .attr("type", "checkbox")
-                .attr("value", countryName)
-                .on("change", function () { selectCountry(this) });
-            dropdownContent.append("text").text(countryName).append("br");
+            
+            // Adicionar verificação para ignorar países sem nome
+            if (countryName) { 
+                dropdownContent.append("label")
+                    .append("input")
+                    .attr("type", "checkbox")
+                    .attr("value", countryName)
+                    .on("change", function () { selectCountry(this); });
+                dropdownContent.append("text").text(countryName).append("br");
+            }
         });
+
     });
 
     // Botão de gerar gráficos
     document.querySelector('#generate-btn').addEventListener('click', generateCharts);
 });
 
+
 function generateCharts() {
-    // Verificar se os gráficos já foram criados e destruí-los
+    // Limpeza de gráficos antigos
     if (charts.length > 0) {
-        charts.forEach(chart => chart.remove()); // Remover gráficos anteriores
+        charts.forEach(chart => chart.remove());
         charts = [];
     }
-
-    // Remover os elementos de canvas antigos
     const chartContainer = document.getElementById('charts-container');
-    chartContainer.innerHTML = ''; // Limpa o container
+    chartContainer.innerHTML = '';
 
-    // Recuperar os países selecionados
     const selectedCountries = [];
     document.querySelectorAll('.dropdown-content input[type="checkbox"]:checked').forEach(checkbox => {
         selectedCountries.push(checkbox.value);
     });
 
-    // Recuperar as métricas selecionadas
     const selectedMetrics = [];
     document.querySelectorAll('.selection-group .metric:checked').forEach(checkbox => {
         selectedMetrics.push(checkbox.value);
     });
 
-    // Verifica se há países e métricas selecionados
     if (selectedCountries.length === 0 || selectedMetrics.length === 0) {
         alert('Selecione ao menos um país e uma métrica para gerar o gráfico.');
         return;
     }
 
-    // Criar gráfico para cada métrica selecionada
-    selectedMetrics.forEach(metric => {
-        const data = selectedCountries.map(country => ({
-            country,
-            value: dataByCountry[country]?.adult?.male?.[metric] || 0
-        }));
+    console.log("Países selecionados:", selectedCountries);
+    console.log("Métricas selecionadas:", selectedMetrics);
 
-        // Configurações do gráfico
+    selectedMetrics.forEach(metric => {
+        const data = selectedCountries.map(country => {
+            // Ajuste a estrutura conforme o console.log de dataByCountry
+            const countryData = dataByCountry[country]?.adult?.female; // Use "adult" e "female" como exemplo; ajuste conforme necessário
+            const value = countryData && metric in countryData ? parseFloat(countryData[metric]) : 0;
+            
+            console.log(`Valor para ${country} - ${metric}:`, value); // Verificação
+            return { country, value };
+        });
+
         const svg = d3.select(chartContainer)
             .append("svg")
             .attr("width", 800)
@@ -85,7 +93,7 @@ function generateCharts() {
         const height = +svg.attr("height") - margin.top - margin.bottom;
 
         const x = d3.scaleLinear()
-            .domain([0, d3.max(data, d => +d.value)])
+            .domain([0, d3.max(data, d => d.value)])
             .range([0, width]);
 
         const y = d3.scaleBand()
@@ -96,15 +104,9 @@ function generateCharts() {
         const chart = svg.append("g")
             .attr("transform", `translate(${margin.left},${margin.top})`);
 
-        // Eixos
-        chart.append("g")
-            .call(d3.axisLeft(y));
-        
-        chart.append("g")
-            .attr("transform", `translate(0,${height})`)
-            .call(d3.axisBottom(x));
+        chart.append("g").call(d3.axisLeft(y));
+        chart.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
 
-        // Barras
         chart.selectAll(".bar")
             .data(data)
             .enter()
