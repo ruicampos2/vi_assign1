@@ -38,7 +38,6 @@ document.addEventListener('DOMContentLoaded', function () {
     document.querySelector('#generate-btn').addEventListener('click', generateCharts);
 });
 
-// Função para gerar gráficos com D3.js
 function generateCharts() {
     // Verificar se os gráficos já foram criados e destruí-los
     if (charts.length > 0) {
@@ -50,49 +49,73 @@ function generateCharts() {
     const chartContainer = document.getElementById('charts-container');
     chartContainer.innerHTML = ''; // Limpa o container
 
-    // Recuperar os países selecionados (códigos ISO)
+    // Recuperar os países selecionados
     const selectedCountries = [];
     document.querySelectorAll('.dropdown-content input[type="checkbox"]:checked').forEach(checkbox => {
-        selectedCountries.push(checkbox.value);  // Aqui pegamos o nome do país
-    });
-
-    // Recuperar os gêneros selecionados
-    const selectedGenders = [];
-    document.querySelectorAll('.selection-group .gender:checked').forEach(checkbox => {
-        selectedGenders.push(checkbox.value);  // Aqui pegamos o valor do gênero (Male ou Female)
-    });
-
-    // Recuperar as faixas etárias selecionadas
-    const selectedAgeGroups = [];
-    document.querySelectorAll('.selection-group .age:checked').forEach(checkbox => {
-        selectedAgeGroups.push(checkbox.value);  // Aqui pegamos a faixa etária (Children ou Adult)
+        selectedCountries.push(checkbox.value);
     });
 
     // Recuperar as métricas selecionadas
     const selectedMetrics = [];
     document.querySelectorAll('.selection-group .metric:checked').forEach(checkbox => {
-        selectedMetrics.push(checkbox.value);  // Aqui pegamos o valor da métrica
+        selectedMetrics.push(checkbox.value);
     });
 
-    // Agora você tem os valores selecionados para países, gênero, faixa etária e métricas.
-    console.log('Países selecionados:', selectedCountries);
-    console.log('Gêneros selecionados:', selectedGenders);
-    console.log('Faixas etárias selecionadas:', selectedAgeGroups);
-    console.log('Métricas selecionadas:', selectedMetrics);
+    // Verifica se há países e métricas selecionados
+    if (selectedCountries.length === 0 || selectedMetrics.length === 0) {
+        alert('Selecione ao menos um país e uma métrica para gerar o gráfico.');
+        return;
+    }
 
-    // Definir as cores para as barras de cada país
-    const colors = [
-        'rgba(255, 99, 132, 0.6)', 'rgba(54, 162, 235, 0.6)', 'rgba(255, 206, 86, 0.6)',
-        'rgba(75, 192, 192, 0.6)', 'rgba(153, 102, 255, 0.6)', 'rgba(255, 159, 64, 0.6)'
-    ];
+    // Criar gráfico para cada métrica selecionada
+    selectedMetrics.forEach(metric => {
+        const data = selectedCountries.map(country => ({
+            country,
+            value: dataByCountry[country]?.adult?.male?.[metric] || 0
+        }));
 
-    // Definir as margens e dimensões para o gráfico
-    const margin = { top: 30, right: 30, bottom: 40, left: 40 };
-    const width = 800 - margin.left - margin.right;
-    const height = 400 - margin.top - margin.bottom;
+        // Configurações do gráfico
+        const svg = d3.select(chartContainer)
+            .append("svg")
+            .attr("width", 800)
+            .attr("height", 400);
 
-    console.log(dataByCountry)
+        const margin = { top: 20, right: 30, bottom: 40, left: 90 };
+        const width = +svg.attr("width") - margin.left - margin.right;
+        const height = +svg.attr("height") - margin.top - margin.bottom;
+
+        const x = d3.scaleLinear()
+            .domain([0, d3.max(data, d => +d.value)])
+            .range([0, width]);
+
+        const y = d3.scaleBand()
+            .domain(data.map(d => d.country))
+            .range([0, height])
+            .padding(0.1);
+
+        const chart = svg.append("g")
+            .attr("transform", `translate(${margin.left},${margin.top})`);
+
+        // Eixos
+        chart.append("g")
+            .call(d3.axisLeft(y));
+        
+        chart.append("g")
+            .attr("transform", `translate(0,${height})`)
+            .call(d3.axisBottom(x));
+
+        // Barras
+        chart.selectAll(".bar")
+            .data(data)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("y", d => y(d.country))
+            .attr("width", d => x(d.value))
+            .attr("height", y.bandwidth());
+    });
 }
+
 
 
 // Função para alternar o dropdown
