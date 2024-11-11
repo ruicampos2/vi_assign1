@@ -4,6 +4,13 @@ var dataByCountry = {};
 // Aguardar o carregamento completo do DOM
 document.addEventListener('DOMContentLoaded', function () {
     // Carregar dados via D3.js
+
+    const selectedCountries = JSON.parse(localStorage.getItem("selectedCountries")) || [];
+    
+    // Itera sobre cada país e adiciona a tag
+    selectedCountries.forEach(country => addTag(country));
+
+
     Promise.all([
         d3.json("https://d3js.org/world-110m.v1.json"),
         d3.csv("dataset/dataset.csv")
@@ -248,8 +255,11 @@ function selectCountry(checkbox) {
 
 // Função para adicionar tag ao país selecionado
 function addTag(country) {
-    const selectedTags = document.getElementById("selected-tags");
 
+    console.log(country)
+
+    const selectedTags = document.getElementById("selected-tags");
+    
     // Verifica se o país já foi adicionado
     if (document.getElementById("tag-" + country)) return;
 
@@ -258,6 +268,7 @@ function addTag(country) {
     tag.id = "tag-" + country;
     tag.innerHTML = `${country} <span class="remove-btn" onclick="removeTag('${country}')">&times;</span>`;
     selectedTags.appendChild(tag);
+    console.log(tag)
 }
 
 // Função para remover tag do país
@@ -265,6 +276,10 @@ function removeTag(country) {
     // Remove o elemento da tag
     const tag = document.getElementById("tag-" + country);
     if (tag) tag.remove();
+
+    let selectedCountries = JSON.parse(localStorage.getItem("selectedCountries")) || [];
+    selectedCountries = selectedCountries.filter(c => c !== country);
+    localStorage.setItem("selectedCountries", JSON.stringify(selectedCountries));
 
     // Desmarca o checkbox no dropdown
     const dropdownCheckbox = document.querySelector(`.dropdown-content input[type="checkbox"][value="${country}"]`);
@@ -283,7 +298,24 @@ window.onload = function () {
         checkbox2.checked = false;  // Desmarcar todos os checkboxes
     });
 
-    // Limpar as tags selecionadas
-    const selectedTags = document.getElementById("selected-tags");
-    selectedTags.innerHTML = "";  // Remove todas as tags
+    // Recuperar os países do localStorage
+    let selectedCountries = JSON.parse(localStorage.getItem("selectedCountries")) || [];
+    
+    // Adiciona as tags armazenadas
+    selectedCountries.forEach(country => addTag(country));
+    
+    // Marca os checkboxes correspondentes aos países armazenados
+    selectedCountries.forEach(country => {
+        // Marcar o checkbox no dropdown com base no país
+        const checkbox = document.querySelector(`.dropdown-content input[type='checkbox'][value='${country}']`);
+        if (checkbox) {
+            checkbox.checked = true; // Marca o checkbox
+        }
+
+        // Marcar o checkbox na seleção de países (caso haja um grupo de seleção)
+        const selectionCheckbox = document.querySelector(`.selection-group input[type='checkbox'][value='${country}']`);
+        if (selectionCheckbox) {
+            selectionCheckbox.checked = true; // Marca o checkbox
+        }
+    });
 };
