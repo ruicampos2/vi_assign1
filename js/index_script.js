@@ -25,7 +25,6 @@ Promise.all([
     }
   });
 
-  console.log(dataByCountry)
 
   function drawMap(containerId, dataType, title, colorScale) {
     d3.select(containerId).selectAll("svg").remove(); // Remove o mapa antigo
