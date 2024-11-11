@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Comparar Países - Dados de Desportos e Obesidade</title>
+  <title>Compare Countries - Sports and Obesity</title>
   <script src="https://d3js.org/d3.v7.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://d3js.org/topojson.v1.min.js"></script>
@@ -15,20 +15,20 @@
 
   <!-- Barra de navegação -->
   <div class="navbar">
-    <button onclick="window.location.href='index.html'">Mapa Global</button>
+    <button onclick="window.location.href='index.html'">Global Map</button>
   </div>
 
   <!-- Conteúdo principal -->
   <div class="content">
-    <h1>Comparar Países - Desportos e Obesidade</h1>
-    <p>Selecione os países, faixas etárias e gêneros que deseja comparar para visualizar as diferenças em participação
-      em desportos e taxas de obesidade</p>
+    <h1>Compare Countries - Sports and Obesity</h1>
+    <p>Select the countries, age groups and genres you want to compare to view the differences in participation
+      in sports and obesity rate</p>
 
     <!-- Contêiner de seleção -->
     <div class="selection-container">
       <!-- Dropdown de Países Selecionados -->
       <div class="dropdown">
-        <button onclick="toggleDropdown()">Países Selecionados</button>
+        <button onclick="toggleDropdown()">Selected Countries</button>
         <div class="dropdown-content" id="dropdown-content">
           <label><input type="checkbox" value="United States" onchange="selectCountry(this)"> United States</label>
           <label><input type="checkbox" value="Brazil" onchange="selectCountry(this)"> Brazil</label>
@@ -71,24 +71,24 @@
 
       <!-- Seleção de Gênero, Faixa Etária e Métricas -->
       <div class="selection-group">
-        <h3>Gênero</h3>
-        <label><input type="checkbox" value="Male" class="gender"> Masculino</label><br>
-        <label><input type="checkbox" value="Female" class="gender"> Feminino</label>
+        <h3>Gender</h3>
+        <label><input type="checkbox" value="Male" class="gender"> Male</label><br>
+        <label><input type="checkbox" value="Female" class="gender"> Female</label>
 
-        <h3>Faixa Etária</h3>
-        <label><input type="checkbox" value="Children" class="age"> Crianças</label><br>
-        <label><input type="checkbox" value="Adult" class="age"> Adultos</label>
+        <h3>Age Group</h3>
+        <label><input type="checkbox" value="Children" class="age"> Child</label><br>
+        <label><input type="checkbox" value="Adult" class="age"> Adult</label>
 
-        <h3>Métricas</h3>
-        <label><input type="checkbox" value="Obesity Rate" class="metric"> Obesidade (%)</label><br>
-        <label><input type="checkbox" value="Football Participation" class="metric"> Futebol (%)</label><br>
-        <label><input type="checkbox" value="Basketball Participation" class="metric"> Basquetebol (%)</label><br>
-        <label><input type="checkbox" value="Running Participation" class="metric"> Corrida (%)</label>
+        <h3>Metrics</h3>
+        <label><input type="checkbox" value="Obesity Rate" class="metric"> Obesity (%)</label><br>
+        <label><input type="checkbox" value="Football Participation" class="metric"> Football (%)</label><br>
+        <label><input type="checkbox" value="Basketball Participation" class="metric"> Basketball (%)</label><br>
+        <label><input type="checkbox" value="Running Participation" class="metric"> Running (%)</label>
       </div>
     </div>
 
     <!-- Botão de Geração de Gráficos -->
-    <button id="generate-btn">Gerar Gráficos</button>
+    <button id="generate-btn">Generate Graphics</button>
 
     <!-- Contêiner para gráficos -->
     <div id="charts-container" class="chart-container"></div>

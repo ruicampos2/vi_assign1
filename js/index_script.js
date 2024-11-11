@@ -41,13 +41,12 @@ Promise.all([
     d3.select(containerId).selectAll("svg").remove();
     var svg = d3.select(containerId).append("svg").attr("width", width).attr("height", height);
 
-    svg.append("text")
-      .attr("x", width / 2)
-      .attr("y", 30)
-      .attr("text-anchor", "middle")
-      .attr("font-size", "20px")
-      .attr("fill", "#333")
-      .text(title);
+    /*svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", 30)
+    .attr("text-anchor", "middle")
+    .attr("class", "title-text") // Adiciona a classe
+    .text(title);*/
 
     svg.selectAll("path")
       .data(countries.filter(d => d.id !== "010")) // Exclui a Antártida

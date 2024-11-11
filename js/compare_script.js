@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .attr("text-anchor", "middle")
             .attr("font-size", "16px")
             .attr("font-weight", "bold")
-            .text("Gráfico de Barras das Métricas Selecionadas");
+            .text("Selected Metrics Bar Chart");
 
         console.log(dataByCountry);
     }

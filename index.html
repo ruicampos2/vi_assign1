@@ -13,21 +13,32 @@
 
 <body>
   <div class="navbar">
-    <button id="globalMapBtn" onclick="window.location.href='index.html'">Mapa Global</button>
-    <button id="compareBtn" onclick="window.location.href='compare.html'">Comparar</button>
+    <button id="globalMapBtn" onclick="window.location.href='index.html'">Global Map</button>
+    <button id="compareBtn" onclick="window.location.href='compare.html'">Compare</button>
   </div>
 
   <div class="filters">
     <div class="filter-group">
-      <label><input type="radio" class="filter" name="ageGroup" value="children" checked> Crianças</label>
-      <label><input type="radio" class="filter" name="ageGroup" value="adult"> Adultos</label>
+      <label><input type="radio" class="filter" name="ageGroup" value="children" checked> Child</label>
+      <label><input type="radio" class="filter" name="ageGroup" value="adult"> Adult</label>
     </div>
     <div class="filter-group">
-      <label><input type="radio" class="filter" name="gender" value="male" checked> Masculino</label>
-      <label><input type="radio" class="filter" name="gender" value="female"> Feminino</label>
+      <label><input type="radio" class="filter" name="gender" value="male" checked> Male</label>
+      <label><input type="radio" class="filter" name="gender" value="female"> Female</label>
     </div>
     <button id="generateBtn">Generate</button>
   </div>
+
+  <div class="title-container">
+    <div class="title-left">
+      <h2 class="title-text">World Sports Practice Fee </h2>
+    </div>
+    <div class="title-right">
+      <h2 class="title-text">Global Obesity Rate</h2>
+    </div>
+  </div>
+  
+  
 
   <div class="maps-container">
     <div id="map1" class="map"></div>
