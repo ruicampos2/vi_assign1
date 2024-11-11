@@ -127,7 +127,7 @@ Promise.all([
     drawMaps(); // Redesenha os mapas com os filtros atualizados
   }
   document.getElementById("generateBtn").addEventListener("click", updateFilters);
-
+  
 
 }).catch(function (error) {
   console.error("Erro ao carregar os dados: ", error);
