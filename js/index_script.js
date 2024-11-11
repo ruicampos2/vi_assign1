@@ -21,15 +21,28 @@ Promise.all([
       if (!dataByCountry[d['ISO Code']]) {
         dataByCountry[d['ISO Code']] = { children: {}, adult: {} };
       }
-      dataByCountry[d['ISO Code']][d.Group.toLowerCase()][d.Gender.toLowerCase()] = d;
+  
+      // Obtém valores de participação em cada desporto
+      const football = parseFloat(d['Football (%)']) || 0;
+      const basketball = parseFloat(d['Basketball (%)']) || 0;
+      const running = parseFloat(d['Running (%)']) || 0;
+  
+      // Calcula a média de participação de desportos
+      const averageSportsParticipation = ((football + basketball + running) / 3).toFixed(2);
+  
+      // Armazena o valor calculado no conjunto de dados
+      dataByCountry[d['ISO Code']][d.Group.toLowerCase()][d.Gender.toLowerCase()] = {
+        ...d,
+        "Sports Participation (%)": averageSportsParticipation
+      };
     }
   });
-
+  
 
   function drawMap(containerId, dataType, title, colorScale) {
-    d3.select(containerId).selectAll("svg").remove(); // Remove o mapa antigo
+    d3.select(containerId).selectAll("svg").remove();
     var svg = d3.select(containerId).append("svg").attr("width", width).attr("height", height);
-
+  
     svg.append("text")
       .attr("x", width / 2)
       .attr("y", 30)
@@ -37,20 +50,23 @@ Promise.all([
       .attr("font-size", "20px")
       .attr("fill", "#333")
       .text(title);
-
+  
     svg.selectAll("path")
-      .data(countries.filter(d => d.id !== "010")) // Exclui a Antártida
-      .join("path") // Redesenha os países com base em novos dados
+      .data(countries)
+      .join("path")
       .attr("class", "country")
       .attr("d", path)
       .attr("fill", function (d) {
         var countryCode = d.id;
         var countryData = dataByCountry[countryCode];
-
+  
         if (countryData) {
           var selectedData = countryData[selectedFilters.ageGroup][selectedFilters.gender];
           if (selectedData) {
-            var value = dataType === "sports" ? selectedData['Football (%)'] : selectedData['Obesity Rate (%)'];
+            // Define o valor a ser utilizado na escala de cores com base no tipo de dado
+            var value = dataType === "sports"
+              ? parseFloat(selectedData['Sports Participation (%)'])
+              : parseFloat(selectedData['Obesity Rate (%)']);
             return colorScale(value);
           }
         }
@@ -59,19 +75,22 @@ Promise.all([
       .on("mouseover", function (event, d) {
         var countryCode = d.id;
         var countryData = dataByCountry[countryCode];
-
+  
         if (countryData) {
           var selectedData = countryData[selectedFilters.ageGroup][selectedFilters.gender];
           if (selectedData) {
             var popup = d3.select("#popup");
             var content = `<h3>${selectedData.Country}</h3>`;
-
+            
+            // Exibe o valor correto no popup com base no tipo de dado
             if (dataType === "sports") {
-              content += `<p>Futebol: ${selectedData['Football (%)'] || 'N/A'}%</p>`;
+              var sportsParticipation = selectedData['Sports Participation (%)'] || 'N/A';
+              content += `<p>Sports Participation: ${sportsParticipation}%</p>`;
             } else {
-              content += `<p>Obesidade: ${selectedData['Obesity Rate (%)'] || 'N/A'}%</p>`;
+              var obesityRate = selectedData['Obesity Rate (%)'] || 'N/A';
+              content += `<p>Obesity Rate: ${obesityRate}%</p>`;
             }
-
+  
             popup.style("left", (event.pageX + 10) + "px")
               .style("top", (event.pageY - 50) + "px")
               .style("display", "block")
@@ -82,7 +101,7 @@ Promise.all([
       .on("mouseleave", function () {
         d3.select("#popup").style("display", "none");
       });
-
+  
     var zoom = d3.zoom()
       .scaleExtent([1, 8])
       .on("zoom", function (event) {
@@ -90,6 +109,8 @@ Promise.all([
       });
     svg.call(zoom);
   }
+  
+  
 
   function drawMaps() {
     drawMap("#map1", "sports", "Taxa da Prática de Desporto Mundial", sportColorScale);
