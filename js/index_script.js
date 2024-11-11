@@ -39,7 +39,7 @@ Promise.all([
       .text(title);
 
     svg.selectAll("path")
-      .data(countries)
+      .data(countries.filter(d => d.id !== "010")) // Exclui a Antártida
       .join("path") // Redesenha os países com base em novos dados
       .attr("class", "country")
       .attr("d", path)
