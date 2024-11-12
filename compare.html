@@ -9,7 +9,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <script src="https://d3js.org/topojson.v1.min.js"></script>
   <script src="js/compare_script.js"></script> <!-- Coloque o caminho correto do arquivo -->
-  <link rel="stylesheet" href="style/compare.css">  <!-- Coloque o caminho correto do arquivo --></head>
+  <link rel="stylesheet" href="style/compare.css"> <!-- Coloque o caminho correto do arquivo -->
+</head>
 
 <body>
 
@@ -80,10 +81,24 @@
         <label><input type="checkbox" value="Adult" class="age"> Adult</label>
 
         <h3>Metrics</h3>
-        <label><input type="checkbox" value="Obesity Rate" class="metric"> Obesity (%)</label><br>
-        <label><input type="checkbox" value="Football Participation" class="metric"> Football (%)</label><br>
-        <label><input type="checkbox" value="Basketball Participation" class="metric"> Basketball (%)</label><br>
-        <label><input type="checkbox" value="Running Participation" class="metric"> Running (%)</label>
+        <label>
+          <input type="checkbox" value="Obesity Rate" class="metric">
+          Obesity (%) <span class="color-dot" style="background-color: orange;"></span>
+        </label><br>
+        <label>
+          <input type="checkbox" value="Football Participation" class="metric">
+          Football (%) <span class="color-dot" style="background-color: steelblue;"></span>
+        </label><br>
+        <label>
+          <input type="checkbox" value="Basketball Participation" class="metric">
+          Basketball (%) <span class="color-dot" style="background-color: red;"></span>
+        </label><br>
+        <label>
+          <input type="checkbox" value="Running Participation" class="metric">
+          Running (%) <span class="color-dot" style="background-color: green;"></span>
+        </label>
+
+
       </div>
     </div>
 
