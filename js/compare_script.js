@@ -6,7 +6,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Carregar dados via D3.js
 
     const selectedCountries = JSON.parse(localStorage.getItem("selectedCountries")) || [];
-    
+
     // Itera sobre cada país e adiciona a tag
     selectedCountries.forEach(country => addTag(country));
 
@@ -94,19 +94,16 @@ document.addEventListener('DOMContentLoaded', function () {
         selectedCountries.forEach(country_name => {
             // Acessa os dados de um país específico pelo código ISO
             let countryData = dataByCountry[country_name];
-            console.log(countryData)
 
             // Verifica se o dado do país existe
             if (countryData) {
-                console.log("entrei");
                 // Para cada grupo de faixa etária, gênero e métrica
                 selectedAgeGroups.forEach(ageGroup => {
                     const ageGroupData = countryData[ageGroup.toLowerCase()];
-                    console.log("dados para a faixa etária: ", ageGroupData);
+                    // console.log("dados para a faixa etária: ", ageGroupData);
                     selectedGenders.forEach(gender => {
-                        console.log("gênero: " + gender);
                         const genderData = ageGroupData[gender.toLowerCase()];
-                        console.log("dados para genero : ", genderData);
+                        // console.log("dados para genero : ", genderData);
                         selectedMetrics.forEach(metric => {
                             // Se o nome do "metric" não contiver o "%" e o dado contiver, adicione-o
                             let metricWithPercent = metric
@@ -114,17 +111,15 @@ document.addEventListener('DOMContentLoaded', function () {
                                 .trim();  // Remove espaços em branco extras
 
                             // Se o nome da métrica não contiver o "%", adicione-o
-                            metricWithPercent = metricWithPercent.includes('%') ? metricWithPercent : metricWithPercent + " (%)"; console.log("Métrica ajustada: " + metricWithPercent);
+                            metricWithPercent = metricWithPercent.includes('%') ? metricWithPercent : metricWithPercent + " (%)";
                             // Acesse o valor no objeto
                             let value = genderData[metricWithPercent];
-                            console.log("value -> " + value)
-
                             if (value !== undefined) {
-                                console.log("valor -> " + value);
-
                                 // Se o valor estiver presente, adicione aos dados filtrados
                                 filteredData.push({
                                     country: country_name,
+                                    ageGroup: ageGroup,     // Adiciona a faixa etária selecionada
+                                    gender: gender,         // Adiciona o gênero selecionado
                                     metric: metricWithPercent,
                                     value: parseFloat(value)  // Converte o valor para número
                                 });
@@ -164,9 +159,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Definir escalas
         const xScale = d3.scaleBand()
-            .domain(filteredData.map(d => d.country + " - " + d.metric.replace("(%)","") ))
-            .range([0, width])
-            .padding(0.1);
+    .domain(filteredData.map(d => `${d.country} - ${d.metric.replace("(%)", "")} - ${d.gender} - ${d.ageGroup}`))
+    .range([0, width])
+    .padding(0.1);
 
         const yScale = d3.scaleLinear()
             .domain([0, d3.max(filteredData, d => d.value)])
@@ -185,28 +180,26 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Criar barras
         svg.selectAll(".bar")
-            .data(filteredData)
-            .enter()
-            .append("rect")
-            .attr("class", "bar")
-            .attr("x", d => xScale(d.country + " - " + d.metric.replace("(%)", "") ))
-            .attr("y", d => yScale(d.value))
-            .attr("width", xScale.bandwidth())
-            .attr("height", d => height - yScale(d.value))
-            .attr("fill", "steelblue")
+    .data(filteredData)
+    .enter()
+    .append("rect")
+    .attr("class", "bar")
+    .attr("x", d => xScale(`${d.country} - ${d.metric.replace("(%)", "")} - ${d.gender} - ${d.ageGroup}`))
+    .attr("y", d => yScale(d.value))
+    .attr("width", xScale.bandwidth())
+    .attr("height", d => height - yScale(d.value))
+    .attr("fill", d => d.gender === "male" ? "steelblue" : "orange")  // Cores para cada gênero
 
-            // Evento mouseover para mostrar o tooltip
-            .on("mouseover", function (event, d) {
-                tooltip.style("visibility", "visible")
-                    .text(`${d.country}: ${d.metric} - ${d.value.toFixed(2)}%`)  // Exibe o valor com 2 casas decimais
-                    .style("top", (event.pageY - 40) + "px")  // Ajusta a posição do tooltip
-                    .style("left", (event.pageX + 10) + "px");  // Ajusta a posição do tooltip
-            })
-
-            // Evento mouseout para esconder o tooltip
-            .on("mouseout", function () {
-                tooltip.style("visibility", "hidden");
-            });
+    // Tooltip
+    .on("mouseover", function (event, d) {
+        tooltip.style("visibility", "visible")
+            .text(`${d.country} - ${d.ageGroup} - ${d.gender}: ${d.metric} - ${d.value.toFixed(2)}%`)
+            .style("top", (event.pageY - 40) + "px")
+            .style("left", (event.pageX + 10) + "px");
+    })
+    .on("mouseout", function () {
+        tooltip.style("visibility", "hidden");
+    });
 
         // Adicionar título
         svg.append("text")
@@ -226,7 +219,7 @@ document.addEventListener('DOMContentLoaded', function () {
             .attr("font-weight", "bold")
             .text("Selected Metrics Bar Chart");
 
-        console.log(dataByCountry);
+        // console.log(dataByCountry);
     }
 
     // Botão de gerar gráficos
@@ -259,7 +252,7 @@ function addTag(country) {
     console.log(country)
 
     const selectedTags = document.getElementById("selected-tags");
-    
+
     // Verifica se o país já foi adicionado
     if (document.getElementById("tag-" + country)) return;
 
@@ -268,7 +261,6 @@ function addTag(country) {
     tag.id = "tag-" + country;
     tag.innerHTML = `${country} <span class="remove-btn" onclick="removeTag('${country}')">&times;</span>`;
     selectedTags.appendChild(tag);
-    console.log(tag)
 }
 
 // Função para remover tag do país
@@ -300,10 +292,10 @@ window.onload = function () {
 
     // Recuperar os países do localStorage
     let selectedCountries = JSON.parse(localStorage.getItem("selectedCountries")) || [];
-    
+
     // Adiciona as tags armazenadas
     selectedCountries.forEach(country => addTag(country));
-    
+
     // Marca os checkboxes correspondentes aos países armazenados
     selectedCountries.forEach(country => {
         // Marcar o checkbox no dropdown com base no país

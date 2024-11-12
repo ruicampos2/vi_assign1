@@ -156,7 +156,7 @@ function selectCountry(countryObj) {
         // Adiciona o nome do país se ainda não estiver na lista
         countryNames.push(countryData.Country);
         country_value = countryData.Country
-      }else{
+      } else {
         country_value = countryData.Country
       }
     }
@@ -166,15 +166,17 @@ function selectCountry(countryObj) {
   console.log(selectedCountries)
 
   // Adiciona ou remove cada país da lista de selecionados
-  if (selectedCountries.includes(country_value)) {
-    console.log(country_value)
-    // Remove o país se já estiver selecionado
-    selectedCountries = selectedCountries.filter(c => c !== country_value);
-    // n é bem isto mas tenho q arranjar maneira de os remover 
-  } else {
-    // Adiciona o país se ainda não estiver selecionado
-    selectedCountries.push(country_value);
+  if (country_value !== null) {
+    if (selectedCountries.includes(country_value)) {
+      console.log(country_value);
+      // Remove o país se já estiver selecionado
+      selectedCountries = selectedCountries.filter(c => c !== country_value);
+    } else {
+      // Adiciona o país se ainda não estiver selecionado
+      selectedCountries.push(country_value);
+    }
   }
+
 
   // Atualiza o localStorage com a lista atualizada de países
   localStorage.setItem("selectedCountries", JSON.stringify(selectedCountries));
@@ -183,5 +185,8 @@ function selectCountry(countryObj) {
   console.log("Países selecionados:", selectedCountries);
 }
 
+window.onload = function () {
+  localStorage.removeItem("selectedCountries");
+};
 
 
