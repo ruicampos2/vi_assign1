@@ -130,7 +130,6 @@ Promise.all([
   }
 
   document.getElementById("generateBtn").addEventListener("click", updateFilters);
-  document.getElementById("viewTop10Btn").addEventListener("click", showTop10Modal);
 
 }).catch(function (error) {
   console.error("Erro ao carregar os dados: ", error);
@@ -165,85 +164,95 @@ window.onload = function () {
   localStorage.removeItem("selectedCountries");
 };
 
-function showTop10Modal() {
-  updateTop10Lists(dataByCountry);
-  document.getElementById("top10Modal").style.display = "flex";
-}
 
-function closeModal() {
-  document.getElementById("top10Modal").style.display = "none";
-}
+document.addEventListener("DOMContentLoaded", function () {
+  // Adiciona o evento para abrir o modal quando clicar em "View Top 10"
+  document.getElementById("viewTop10Btn").addEventListener("click", showTop10Modal);
 
-document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+  // Adiciona o evento para fechar o modal quando clicar em "Close"
+  document.getElementById("closeModalBtn").addEventListener("click", closeModal);
 
-function updateTop10Lists(dataByCountry) {
-  const ageGroup = selectedFilters.ageGroup;
-  const gender = selectedFilters.gender;
+  // Função para exibir o modal e renderizar os gráficos Top 10
+  function showTop10Modal() {
+      updateTop10Lists(dataByCountry); // Atualizar os gráficos com o Top 10
+      document.getElementById("top10Modal").style.display = "block"; // Exibir o modal
+  }
 
-  const sportsTop10 = Object.values(dataByCountry)
-    .map(countryData => {
-      const data = countryData[ageGroup][gender];
-      return {
-        country: data.Country,
-        value: parseFloat(data['Sports Participation (%)'] || 0)
-      };
-    })
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 10);
+  // Função para fechar o modal
+  function closeModal() {
+      document.getElementById("top10Modal").style.display = "none"; // Esconder o modal
+  }
 
-  const obesityTop10 = Object.values(dataByCountry)
-    .map(countryData => {
-      const data = countryData[ageGroup][gender];
-      return {
-        country: data.Country,
-        value: parseFloat(data['Obesity Rate (%)'] || 0)
-      };
-    })
-    .sort((a, b) => b.value - a.value)
-    .slice(0, 10);
+  function updateTop10Lists(dataByCountry) {
+      const ageGroup = selectedFilters.ageGroup;
+      const gender = selectedFilters.gender;
 
-  renderBarChart(sportsTop10, "#sportsChart", "Sports Participation (%)");
-  renderBarChart(obesityTop10, "#obesityChart", "Obesity Rate (%)");
-}
+      const sportsTop10 = Object.values(dataByCountry)
+          .map(countryData => {
+              const data = countryData[ageGroup][gender];
+              return {
+                  country: data.Country,
+                  value: parseFloat(data['Sports Participation (%)'] || 0)
+              };
+          })
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 10);
 
-function renderBarChart(data, containerId, yLabel) {
-  d3.select(containerId).selectAll("*").remove();
-  const margin = { top: 20, right: 30, bottom: 40, left: 90 };
-  const width = 400 - margin.left - margin.right;
-  const height = 300 - margin.top - margin.bottom;
+      const obesityTop10 = Object.values(dataByCountry)
+          .map(countryData => {
+              const data = countryData[ageGroup][gender];
+              return {
+                  country: data.Country,
+                  value: parseFloat(data['Obesity Rate (%)'] || 0)
+              };
+          })
+          .sort((a, b) => b.value - a.value)
+          .slice(0, 10);
 
-  const svg = d3.select(containerId)
-    .append("svg")
-    .attr("width", width + margin.left + margin.right)
-    .attr("height", height + margin.top + margin.bottom)
-    .append("g")
-    .attr("transform", `translate(${margin.left},${margin.top})`);
+      renderBarChart(sportsTop10, "#sportsChart", "Sports Participation (%)");
+      renderBarChart(obesityTop10, "#obesityChart", "Obesity Rate (%)");
+  }
 
-  const x = d3.scaleLinear()
-    .domain([0, d3.max(data, d => d.value)])
-    .range([0, width]);
+  function renderBarChart(data, containerId, yLabel) {
+      d3.select(containerId).selectAll("*").remove();
 
-  const y = d3.scaleBand()
-    .domain(data.map(d => d.country))
-    .range([0, height])
-    .padding(0.1);
+      const margin = { top: 20, right: 30, bottom: 40, left: 90 };
+      const width = 400 - margin.left - margin.right;
+      const height = 300 - margin.top - margin.bottom;
 
-  svg.selectAll("rect")
-    .data(data)
-    .enter()
-    .append("rect")
-    .attr("x", x(0))
-    .attr("y", d => y(d.country))
-    .attr("width", d => x(d.value))
-    .attr("height", y.bandwidth())
-    .attr("fill", "#69b3a2");
+      const svg = d3.select(containerId)
+          .append("svg")
+          .attr("width", width + margin.left + margin.right)
+          .attr("height", height + margin.top + margin.bottom)
+          .append("g")
+          .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  svg.append("g").call(d3.axisLeft(y));
-  svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+      const x = d3.scaleLinear()
+          .domain([0, d3.max(data, d => d.value)])
+          .range([0, width]);
 
-  svg.append("text")
-    .attr("x", width / 2)
-    .attr("y", height + margin.bottom - 5)
-    .attr("text-anchor", "middle")
-    .text(yLabel);
-}
+      const y = d3.scaleBand()
+          .domain(data.map(d => d.country))
+          .range([0, height])
+          .padding(0.1);
+
+      svg.selectAll("rect")
+          .data(data)
+          .enter()
+          .append("rect")
+          .attr("x", x(0))
+          .attr("y", d => y(d.country))
+          .attr("width", d => x(d.value))
+          .attr("height", y.bandwidth())
+          .attr("fill", "#69b3a2");
+
+      svg.append("g").call(d3.axisLeft(y));
+      svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+
+      svg.append("text")
+          .attr("x", width / 2)
+          .attr("y", height + margin.bottom - 5)
+          .attr("text-anchor", "middle")
+          .text(yLabel);
+  }
+});

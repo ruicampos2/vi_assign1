@@ -45,12 +45,13 @@
   <div id="popup" class="popup"></div>
 
   <!-- Modal para exibir os gráficos de Top 10 -->
-  <div id="top10Modal" class="modal" style="display: none;">
-    <div class="modal-content">
-      <span id="closeModalBtn" class="close">&times;</span>
-      <div id="sportsChart"></div>
-      <div id="obesityChart"></div>
-    </div>
-  </div>
+  <!-- Modal do Top 10 -->
+<div id="top10Modal" style="display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 500px; background-color: white; box-shadow: 0px 4px 8px rgba(0,0,0,0.2); padding: 20px; border-radius: 8px; z-index: 1000;">
+  <button id="closeModalBtn" style="float: right; background-color: transparent; border: none; font-size: 16px; cursor: pointer;">Close</button>
+  <div id="sportsChart"></div>
+  <div id="obesityChart" style="margin-top: 20px;"></div>
+</div>
+
+
 </body>
 </html>
