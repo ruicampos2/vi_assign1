@@ -12,12 +12,13 @@ var obesityColorScale = d3.scaleQuantize().domain([0, 50]).range(d3.schemeYlOrBr
 var selectedFilters = { ageGroup: "children", gender: "male" };
 var selectedCountryCodes = new Set(); // Armazena os códigos dos países selecionados
 
+let dataByCountry = {}; // Coloca o dataByCountry em um escopo acessível
+
 Promise.all([
   d3.json("https://d3js.org/world-110m.v1.json"),
   d3.csv("dataset/dataset.csv")
 ]).then(function ([worldData, csvData]) {
   var countries = topojson.feature(worldData, worldData.objects.countries).features;
-  var dataByCountry = {};
 
   csvData.forEach(function (d) {
     if (d['ISO Code']) {
@@ -41,13 +42,6 @@ Promise.all([
     d3.select(containerId).selectAll("svg").remove();
     var svg = d3.select(containerId).append("svg").attr("width", width).attr("height", height);
 
-    /*svg.append("text")
-    .attr("x", width / 2)
-    .attr("y", 30)
-    .attr("text-anchor", "middle")
-    .attr("class", "title-text") // Adiciona a classe
-    .text(title);*/
-
     svg.selectAll("path")
       .data(countries.filter(d => d.id !== "010")) // Exclui a Antártida
       .join("path")
@@ -57,9 +51,8 @@ Promise.all([
         var countryCode = d.id;
         var countryData = dataByCountry[countryCode];
 
-        // Verifica se o país está selecionado e aplica a cor de destaque
         if (selectedCountryCodes.has(countryCode)) {
-          return "#FF0000"; // Cor de destaque para os países selecionados
+          return "#FF0000";
         }
 
         if (countryData) {
@@ -71,7 +64,7 @@ Promise.all([
             return colorScale(value);
           }
         }
-        return "#ccc"; // Cor padrão quando não há dados
+        return "#ccc";
       })
       .on("mouseover", function (event, d) {
         var countryCode = d.id;
@@ -104,18 +97,18 @@ Promise.all([
       .on("click", function (event, d) {
         var countryCode = d.id;
         if (selectedCountryCodes.has(countryCode)) {
-          selectedCountryCodes.delete(countryCode); // Desmarca o país se já estiver selecionado
+          selectedCountryCodes.delete(countryCode);
           selectCountry(dataByCountry[countryCode])
         } else {
-          selectedCountryCodes.add(countryCode); // Seleciona o país
+          selectedCountryCodes.add(countryCode);
           selectCountry(dataByCountry[countryCode])
         }
-        drawMaps(); // Redesenha os mapas para aplicar a cor de destaque
+        drawMaps();
       });
 
     var zoom = d3.zoom()
-      .scaleExtent([1, 8])  // Limita o zoom entre 1x e 8x
-      .translateExtent([[0, 0], [width, height]])  // Define os limites de movimento para o mapa
+      .scaleExtent([1, 8])
+      .translateExtent([[0, 0], [width, height]])
       .on("zoom", function (event) {
         svg.selectAll("path").attr("transform", event.transform);
       });
@@ -137,56 +130,120 @@ Promise.all([
   }
 
   document.getElementById("generateBtn").addEventListener("click", updateFilters);
+  document.getElementById("viewTop10Btn").addEventListener("click", showTop10Modal);
 
 }).catch(function (error) {
   console.error("Erro ao carregar os dados: ", error);
 });
 
-
-// Exemplo para adicionar país selecionado ao localStorage
 function selectCountry(countryObj) {
-  let country_value = null
-  // Itera através do objeto para extrair o nome do país
+  let country_value = null;
   for (const ageGroup in countryObj) {
     const genderData = countryObj[ageGroup];
-
     for (const gender in genderData) {
       const countryData = genderData[gender];
       if (!countryNames.includes(countryData.Country)) {
-        // Adiciona o nome do país se ainda não estiver na lista
         countryNames.push(countryData.Country);
-        country_value = countryData.Country
+        country_value = countryData.Country;
       } else {
-        country_value = countryData.Country
+        country_value = countryData.Country;
       }
     }
   }
-  // Obtém os países selecionados previamente no localStorage
   let selectedCountries = JSON.parse(localStorage.getItem("selectedCountries")) || [];
-  console.log(selectedCountries)
-
-  // Adiciona ou remove cada país da lista de selecionados
   if (country_value !== null) {
     if (selectedCountries.includes(country_value)) {
-      console.log(country_value);
-      // Remove o país se já estiver selecionado
       selectedCountries = selectedCountries.filter(c => c !== country_value);
     } else {
-      // Adiciona o país se ainda não estiver selecionado
       selectedCountries.push(country_value);
     }
   }
-
-
-  // Atualiza o localStorage com a lista atualizada de países
   localStorage.setItem("selectedCountries", JSON.stringify(selectedCountries));
-
-  // Exibe os países selecionados no console para verificação
-  console.log("Países selecionados:", selectedCountries);
 }
 
 window.onload = function () {
   localStorage.removeItem("selectedCountries");
 };
 
+function showTop10Modal() {
+  updateTop10Lists(dataByCountry);
+  document.getElementById("top10Modal").style.display = "flex";
+}
 
+function closeModal() {
+  document.getElementById("top10Modal").style.display = "none";
+}
+
+document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+
+function updateTop10Lists(dataByCountry) {
+  const ageGroup = selectedFilters.ageGroup;
+  const gender = selectedFilters.gender;
+
+  const sportsTop10 = Object.values(dataByCountry)
+    .map(countryData => {
+      const data = countryData[ageGroup][gender];
+      return {
+        country: data.Country,
+        value: parseFloat(data['Sports Participation (%)'] || 0)
+      };
+    })
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+
+  const obesityTop10 = Object.values(dataByCountry)
+    .map(countryData => {
+      const data = countryData[ageGroup][gender];
+      return {
+        country: data.Country,
+        value: parseFloat(data['Obesity Rate (%)'] || 0)
+      };
+    })
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+
+  renderBarChart(sportsTop10, "#sportsChart", "Sports Participation (%)");
+  renderBarChart(obesityTop10, "#obesityChart", "Obesity Rate (%)");
+}
+
+function renderBarChart(data, containerId, yLabel) {
+  d3.select(containerId).selectAll("*").remove();
+  const margin = { top: 20, right: 30, bottom: 40, left: 90 };
+  const width = 400 - margin.left - margin.right;
+  const height = 300 - margin.top - margin.bottom;
+
+  const svg = d3.select(containerId)
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  const x = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.value)])
+    .range([0, width]);
+
+  const y = d3.scaleBand()
+    .domain(data.map(d => d.country))
+    .range([0, height])
+    .padding(0.1);
+
+  svg.selectAll("rect")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("x", x(0))
+    .attr("y", d => y(d.country))
+    .attr("width", d => x(d.value))
+    .attr("height", y.bandwidth())
+    .attr("fill", "#69b3a2");
+
+  svg.append("g").call(d3.axisLeft(y));
+  svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + margin.bottom - 5)
+    .attr("text-anchor", "middle")
+    .text(yLabel);
+}
