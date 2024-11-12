@@ -135,7 +135,7 @@ document.addEventListener('DOMContentLoaded', function () {
         });
 
         // Definir dimensões do gráfico
-        const margin = { top: 30, right: 30, bottom: 70, left: 60 };
+        const margin = { top: 30, right: 30, bottom: 200, left: 100 };  // Aumentar a margem inferior
         const width = 1300 - margin.left - margin.right;
         const height = 800 - margin.top - margin.bottom;
 
@@ -170,36 +170,41 @@ document.addEventListener('DOMContentLoaded', function () {
         // Adicionar eixos
         svg.append("g")
             .attr("transform", `translate(0, ${height})`)
-            .call(d3.axisBottom(xScale))
+            .call(d3.axisBottom(xScale).tickFormat(d => {
+                return d.replace(/ - /g, "\n");  // Adiciona quebras de linha
+            }))
             .selectAll("text")
-            // .attr("transform", "rotate(-45)")
-            .style("text-anchor", "middle");
+            .attr("transform", "rotate(-45)")
+            .style("text-anchor", "end")
+            .style("font-size", "10px");
+
+
 
         svg.append("g")
             .call(d3.axisLeft(yScale));
 
         // Criar barras
+        // Criar barras
         svg.selectAll(".bar")
-    .data(filteredData)
-    .enter()
-    .append("rect")
-    .attr("class", "bar")
-    .attr("x", d => xScale(`${d.country} - ${d.metric.replace("(%)", "")} - ${d.gender} - ${d.ageGroup}`))
-    .attr("y", d => yScale(d.value))
-    .attr("width", xScale.bandwidth())
-    .attr("height", d => height - yScale(d.value))
-    .attr("fill", d => d.gender === "male" ? "steelblue" : "orange")  // Cores para cada gênero
+            .data(filteredData)
+            .enter()
+            .append("rect")
+            .attr("class", "bar")
+            .attr("x", d => xScale(`${d.country} - ${d.metric.replace("(%)", "")} - ${d.gender} - ${d.ageGroup}`))
+            .attr("y", d => yScale(d.value))
+            .attr("width", xScale.bandwidth())
+            .attr("height", d => height - yScale(d.value))
+            .attr("fill", d => getColor(d.metric))  // Usa a função getColor para definir a cor
+            .on("mouseover", function (event, d) {
+                tooltip.style("visibility", "visible")
+                    .text(`${d.country} - ${d.ageGroup} - ${d.gender}: ${d.metric} - ${d.value.toFixed(2)}%`)
+                    .style("top", (event.pageY - 40) + "px")
+                    .style("left", (event.pageX + 10) + "px");
+            })
+            .on("mouseout", function () {
+                tooltip.style("visibility", "hidden");
+            });
 
-    // Tooltip
-    .on("mouseover", function (event, d) {
-        tooltip.style("visibility", "visible")
-            .text(`${d.country} - ${d.ageGroup} - ${d.gender}: ${d.metric} - ${d.value.toFixed(2)}%`)
-            .style("top", (event.pageY - 40) + "px")
-            .style("left", (event.pageX + 10) + "px");
-    })
-    .on("mouseout", function () {
-        tooltip.style("visibility", "hidden");
-    });
 
         // Adicionar título
         svg.append("text")
@@ -311,3 +316,18 @@ window.onload = function () {
         }
     });
 };
+
+function getColor(metric) {
+    switch (metric) {
+        case 'Football (%)':
+            return 'steelblue'; // Azul para Futebol
+        case 'Basketball (%)':
+            return 'red'; // Vermelho para Basquete
+        case 'Running (%)':
+            return 'green'; // Verde para Corrida
+        case 'Obesity Rate (%)':
+            return 'orange'; // Laranja para Obesidade
+        default:
+            return 'gray'; // Cor padrão
+    }
+}
