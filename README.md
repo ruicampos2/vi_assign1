@@ -4,11 +4,16 @@
 ## João Morcão 103625
 ## Rui Campos 103709
 
-#COMO RODAR:
-python3 -m http.server 8000
-Ir ao navegador e colocar
+### How to run
 
+1. 
+```bash
+python3 -m http.server 8000
+```
+2. 
+```bash
 http://localhost:8000/
+```
 
 
 Ideias para o projeto
