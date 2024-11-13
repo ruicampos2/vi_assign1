@@ -159,9 +159,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Definir escalas
         const xScale = d3.scaleBand()
-    .domain(filteredData.map(d => `${d.country} - ${d.metric.replace("(%)", "")} - ${d.gender} - ${d.ageGroup}`))
-    .range([0, width])
-    .padding(0.1);
+            .domain(filteredData.map(d => `${d.country} - ${d.metric.replace("(%)", "")} - ${d.gender} - ${d.ageGroup}`))
+            .range([0, width])
+            .padding(0.1);
 
         const yScale = d3.scaleLinear()
             .domain([0, d3.max(filteredData, d => d.value)])
@@ -171,7 +171,8 @@ document.addEventListener('DOMContentLoaded', function () {
         svg.append("g")
             .attr("transform", `translate(0, ${height})`)
             .call(d3.axisBottom(xScale).tickFormat(d => {
-                return d.replace(/ - /g, "\n");  // Adiciona quebras de linha
+                const parts = d.split(" - ");
+                return `${parts[0]} - ${parts[2]} - ${parts[3]}`;  // Exibe país e métrica
             }))
             .selectAll("text")
             .attr("transform", "rotate(-45)")

@@ -130,7 +130,8 @@ svg {
 }
 
 #top10Modal {
-  display: none; /* Esconde o modal inicialmente */
+  display: none;
+  /* Esconde o modal inicialmente */
   position: fixed;
   top: 50%;
   left: 50%;
@@ -156,7 +157,8 @@ svg {
 }
 
 .modal {
-  display: none; /* Esconde o modal inicialmente */
+  display: none;
+  /* Esconde o modal inicialmente */
   position: fixed;
   top: 50%;
   left: 50%;
@@ -182,7 +184,66 @@ svg {
   cursor: pointer;
 }
 
-#sportsChart, #obesityChart {
+#sportsChart,
+#obesityChart {
   margin-top: 20px;
 }
 
+.btn {
+  position: relative; /* Para posicionamento dos ícones */
+  outline: 0;
+  display: flex; /* Usa flex para centralizar conteúdo */
+  align-items: center;
+  justify-content: center; /* Centraliza o texto e os ícones */
+  background: #40B3A2;
+  min-width: 200px;
+  border: 0;
+  border-radius: 4px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, .1);
+  box-sizing: border-box;
+  padding: 16px 20px;
+  color: #fff;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 1.2px;
+  text-transform: uppercase;
+  cursor: pointer;
+  overflow: hidden;
+}
+
+.btn:hover {
+  opacity: .95;
+}
+
+.btn .animation {
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.3);
+  animation: ripple 0.6s linear infinite;
+}
+
+.btn .animation:first-of-type {
+  left: 10px;
+}
+
+.btn .animation:last-of-type {
+  right: 10px;
+}
+
+@keyframes ripple {
+  0% {
+    box-shadow: 0 0 0 0 rgba(255, 255, 255, 0.1),
+      0 0 0 20px rgba(255, 255, 255, 0.1),
+      0 0 0 40px rgba(255, 255, 255, 0.1),
+      0 0 0 60px rgba(255, 255, 255, 0.1);
+  }
+
+  100% {
+    box-shadow: 0 0 0 20px rgba(255, 255, 255, 0.1),
+      0 0 0 40px rgba(255, 255, 255, 0.1),
+      0 0 0 60px rgba(255, 255, 255, 0.1),
+      0 0 0 80px rgba(255, 255, 255, 0);
+  }
+}

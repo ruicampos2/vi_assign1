@@ -131,7 +131,7 @@ h1 {
 }
 
 .selected-tag {
-    background-color: #007bff;
+    background-color: brown;
     color: white;
     padding: 5px 10px;
     border-radius: 15px;
