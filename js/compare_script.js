@@ -35,15 +35,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Preencher o dropdown com os países
         var dropdownContent = d3.select("#dropdown-content");
+
         countries.forEach(function (country) {
             var countryName = country.properties.name;
-            dropdownContent.append("label")
-                .append("input")
-                .attr("type", "checkbox")
-                .attr("value", countryName)
-                .on("change", function () { selectCountry(this) });
-            dropdownContent.append("text").text(countryName).append("br");
+
+            // Verifique se o nome do país é válido e não está vazio
+            if (countryName && countryName.trim() !== "") {
+                dropdownContent.append("label")
+                    .append("input")
+                    .attr("type", "checkbox")
+                    .attr("value", countryName)
+                    .on("change", function () { selectCountry(this); });
+                
+                dropdownContent.append("text").text(countryName);
+            }
         });
+
     });
 
 
