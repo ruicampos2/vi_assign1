@@ -358,5 +358,24 @@ function filterDropdown() {
         label.style.display = "none";
       }
     }
+}
+
+function filterCountries() {
+    const input = document.getElementById("searchInput");
+    const filter = input.value.toUpperCase();
+    const dropdownContent = document.getElementById("dropdown-content");
+    const labels = dropdownContent.getElementsByTagName("label");
+  
+    // Loop através de todos os itens do dropdown e mostra/oculta conforme a correspondência
+    for (let i = 0; i < labels.length; i++) {
+      const label = labels[i];
+      const txtValue = label.textContent || label.innerText;
+      if (txtValue.toUpperCase().indexOf(filter) > -1) {
+        label.style.display = "";
+      } else {
+        label.style.display = "none";
+      }
+    }
   }
+  
   

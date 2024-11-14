@@ -183,6 +183,8 @@
       <div class="dropdown">
         <button onclick="toggleDropdown()">Selected Countries</button>
         <div class="dropdown-content" id="dropdown-content">
+           <!-- Campo de pesquisa -->
+          <input type="text" id="searchInput" placeholder="Search countries..." onkeyup="filterCountries()">
           <label><input type="checkbox" value="United States" onchange="selectCountry(this)"> United States</label>
           <label><input type="checkbox" value="Brazil" onchange="selectCountry(this)"> Brazil</label>
           <label><input type="checkbox" value="Germany" onchange="selectCountry(this)"> Germany</label>
