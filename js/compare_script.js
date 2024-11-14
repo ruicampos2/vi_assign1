@@ -54,6 +54,8 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
 
+
+
     function generateCharts() {
         // Verificar se os gráficos já foram criados e destruí-los
         if (charts.length > 0) {
@@ -339,3 +341,22 @@ function getColor(metric) {
             return 'gray'; // Cor padrão
     }
 }
+
+function filterDropdown() {
+    var input, filter, dropdownContent, labels, label, i;
+    input = document.getElementById("countrySearch");
+    filter = input.value.toUpperCase();
+    dropdownContent = document.getElementById("dropdown-content");
+    labels = dropdownContent.getElementsByTagName("label");
+  
+    // Loop para esconder os países que não correspondem ao filtro
+    for (i = 0; i < labels.length; i++) {
+      label = labels[i];
+      if (label.textContent.toUpperCase().indexOf(filter) > -1) {
+        label.style.display = "";
+      } else {
+        label.style.display = "none";
+      }
+    }
+  }
+  
