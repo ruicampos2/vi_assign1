@@ -177,6 +177,9 @@
     <p>Select the countries, age groups and genres you want to compare to view the differences in participation
       in sports and obesity rate</p>
 
+    <!-- Contêiner de seleção -->
+    <div class="selection-container">
+      <!-- Dropdown de Países Selecionados -->
       <div class="dropdown">
         <button onclick="toggleDropdown()">Selected Countries</button>
         <div class="dropdown-content" id="dropdown-content">
@@ -213,9 +216,11 @@
           <label><input type="checkbox" value="Chile" onchange="selectCountry(this)"> Chile</label>
           <label><input type="checkbox" value="Colombia" onchange="selectCountry(this)"> Colombia</label>
           <label><input type="checkbox" value="Peru" onchange="selectCountry(this)"> Peru</label>
+          <!-- Adicione outros países conforme necessário -->
         </div>
+        <div class="selected-tags" id="selected-tags"></div>
       </div>
-      
+    </div>
     
 
       <!-- Seleção de Gênero, Faixa Etária e Métricas -->
