@@ -117,8 +117,8 @@ Promise.all([
   }
 
   function drawMaps() {
-    drawMap("#map1", "sports", "Taxa da Prática de Desporto Mundial", sportColorScale);
-    drawMap("#map2", "obesity", "Taxa de Obesidade Mundial", obesityColorScale);
+    drawMap("#map1", "sports", "Global Sports Participation Rate", sportColorScale);
+    drawMap("#map2", "obesity", "Global Obesity Rate", obesityColorScale);
   }
 
   drawMaps();
@@ -132,7 +132,7 @@ Promise.all([
   document.getElementById("generateBtn").addEventListener("click", updateFilters);
 
 }).catch(function (error) {
-  console.error("Erro ao carregar os dados: ", error);
+  console.error("Error loading data: ", error);
 });
 
 function selectCountry(countryObj) {
@@ -172,53 +172,40 @@ document.addEventListener("DOMContentLoaded", function () {
   // Adiciona o evento para fechar o modal quando clicar em "Close"
   document.getElementById("closeModalBtn").addEventListener("click", closeModal);
 
-  // Função para exibir o modal e renderizar os gráficos Top 10
   function showTop10Modal() {
-      updateTop10Lists(dataByCountry); // Atualizar os gráficos com o Top 10
-      document.getElementById("top10Modal").style.display = "block"; // Exibir o modal
+      updateTop10Lists(dataByCountry);
+      document.getElementById("top10Modal").style.display = "block";
   }
 
-  // Função para fechar o modal
   function closeModal() {
-      document.getElementById("top10Modal").style.display = "none"; // Esconder o modal
+      document.getElementById("top10Modal").style.display = "none";
   }
 
   function updateTop10Lists(dataByCountry) {
       const ageGroup = selectedFilters.ageGroup;
       const gender = selectedFilters.gender;
 
-      const sportsTop10 = Object.values(dataByCountry)
+      const top10 = Object.values(dataByCountry)
           .map(countryData => {
               const data = countryData[ageGroup][gender];
               return {
                   country: data.Country,
-                  value: parseFloat(data['Sports Participation (%)'] || 0)
+                  sportsParticipation: parseFloat(data['Sports Participation (%)'] || 0),
+                  obesityRate: parseFloat(data['Obesity Rate (%)'] || 0)
               };
           })
-          .sort((a, b) => b.value - a.value)
+          .sort((a, b) => b.sportsParticipation - a.sportsParticipation)
           .slice(0, 10);
 
-      const obesityTop10 = Object.values(dataByCountry)
-          .map(countryData => {
-              const data = countryData[ageGroup][gender];
-              return {
-                  country: data.Country,
-                  value: parseFloat(data['Obesity Rate (%)'] || 0)
-              };
-          })
-          .sort((a, b) => b.value - a.value)
-          .slice(0, 10);
-
-      renderBarChart(sportsTop10, "#sportsChart", "Sports Participation (%)");
-      renderBarChart(obesityTop10, "#obesityChart", "Obesity Rate (%)");
+      renderScatterPlot(top10, "#sportsChart");
   }
 
-  function renderBarChart(data, containerId, yLabel) {
+  function renderScatterPlot(data, containerId) {
     d3.select(containerId).selectAll("*").remove();
 
-    const margin = { top: 20, right: 30, bottom: 40, left: 90 };
+    const margin = { top: 30, right: 20, bottom: 60, left: 60 };
     const width = 500 - margin.left - margin.right;
-    const height = 300 - margin.top - margin.bottom;
+    const height = 400 - margin.top - margin.bottom;
 
     const svg = d3.select(containerId)
         .append("svg")
@@ -227,35 +214,60 @@ document.addEventListener("DOMContentLoaded", function () {
         .append("g")
         .attr("transform", `translate(${margin.left},${margin.top})`);
 
-    // Define a escala do eixo X com um limite fixo de 50
     const x = d3.scaleLinear()
-        .domain([0, 50]) // Altere para o valor máximo desejado
+        .domain([0, d3.max(data, d => d.sportsParticipation) + 5])
         .range([0, width]);
 
-    const y = d3.scaleBand()
-        .domain(data.map(d => d.country))
-        .range([0, height])
-        .padding(0.1);
+    const y = d3.scaleLinear()
+        .domain([0, d3.max(data, d => d.obesityRate) + 5])
+        .range([height, 0]);
 
-    svg.selectAll("rect")
+    svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+    svg.append("g").call(d3.axisLeft(y));
+
+    svg.selectAll("dot")
         .data(data)
         .enter()
-        .append("rect")
-        .attr("x", x(0))
-        .attr("y", d => y(d.country))
-        .attr("width", d => x(d.value))
-        .attr("height", y.bandwidth())
-        .attr("fill", "#69b3a2");
+        .append("circle")
+        .attr("cx", d => x(d.sportsParticipation))
+        .attr("cy", d => y(d.obesityRate))
+        .attr("r", 5)
+        .style("fill", "#69b3a2");
 
-    svg.append("g").call(d3.axisLeft(y));
-    svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+    svg.selectAll("text.label")
+        .data(data)
+        .enter()
+        .append("text")
+        .attr("x", d => x(d.sportsParticipation) + 5)
+        .attr("y", d => y(d.obesityRate))
+        .text(d => d.country)
+        .style("font-size", "10px");
 
+    // Adicionando título
     svg.append("text")
         .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 5)
+        .attr("y", -10)
         .attr("text-anchor", "middle")
-        .text(yLabel);
-  }
+        .attr("font-size", "14px")
+        .attr("font-weight", "bold")
+        .text("Top 10 Countries: Sports Participation vs Obesity Rate");
 
+    // Adicionando rótulo do eixo X
+    svg.append("text")
+        .attr("x", width / 2)
+        .attr("y", height + margin.bottom - 10)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "12px")
+        .text("Sports Participation (%)");
+
+    // Adicionando rótulo do eixo Y
+    svg.append("text")
+        .attr("transform", "rotate(-90)")
+        .attr("x", -height / 2)
+        .attr("y", -margin.left + 15)
+        .attr("text-anchor", "middle")
+        .attr("font-size", "12px")
+        .text("Obesity Rate (%)");
+}
 
 });
