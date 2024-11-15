@@ -235,13 +235,15 @@ document.addEventListener("DOMContentLoaded", function () {
         .style("fill", "#69b3a2");
 
     svg.selectAll("text.label")
-        .data(data)
-        .enter()
-        .append("text")
-        .attr("x", d => x(d.sportsParticipation) + 5)
-        .attr("y", d => y(d.obesityRate))
-        .text(d => d.country)
-        .style("font-size", "10px");
+      .data(data)
+      .enter()
+      .append("text")
+      .attr("x", d => x(d.sportsParticipation) -6) // Deslocamento horizontal
+      .attr("y", d => y(d.obesityRate) - 1) // Deslocamento vertical
+      .text(d => d.country)
+      .style("font-size", "9px")
+      .style("font-weight");
+    
 
     // Adicionando título
     svg.append("text")
