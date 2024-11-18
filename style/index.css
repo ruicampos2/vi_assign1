@@ -189,6 +189,23 @@ svg {
   margin-top: 20px;
 }
 
+.map-container {
+  position: relative;
+}
+
+.map-container.blur {
+  opacity: 0.3;
+  pointer-events: none;
+  transition: opacity 0.3s ease-in-out;
+}
+
+.map-container.normal {
+  opacity: 1;
+  pointer-events: all;
+  transition: opacity 0.3s ease-in-out;
+}
+
+
 .btn {
   position: relative; /* Para posicionamento dos ícones */
   outline: 0;
