@@ -126,8 +126,19 @@ Promise.all([
   function updateFilters() {
     selectedFilters.ageGroup = document.querySelector("input[name='ageGroup']:checked").value;
     selectedFilters.gender = document.querySelector("input[name='gender']:checked").value;
+  
+    // Atualiza os mapas
     drawMaps();
+  
+    const top10Modal = document.getElementById("top10Modal");
+    const isModalVisible = window.getComputedStyle(top10Modal).display === "block";
+
+    if (isModalVisible) {
+      updateTop10Lists(dataByCountry); // Atualiza os gráficos do Top 10
+    }
+
   }
+  
 
   document.getElementById("generateBtn").addEventListener("click", updateFilters);
 
@@ -224,7 +235,7 @@ window.onload = function () {
   
       // Define a escala do eixo X
       const x = d3.scaleLinear()
-        .domain([0, d3.max(data, d => d.value)])
+        .domain([0, 50])
         .range([0, width]);
   
       const y = d3.scaleBand()
@@ -255,7 +266,7 @@ window.onload = function () {
     function updateTop10Lists(dataByCountry) {
       const ageGroup = selectedFilters.ageGroup;
       const gender = selectedFilters.gender;
-  
+    
       const sportsTop10 = Object.values(dataByCountry)
         .map(countryData => {
           const data = countryData[ageGroup][gender];
@@ -266,7 +277,7 @@ window.onload = function () {
         })
         .sort((a, b) => b.value - a.value)
         .slice(0, 10);
-  
+    
       const obesityTop10 = Object.values(dataByCountry)
         .map(countryData => {
           const data = countryData[ageGroup][gender];
@@ -277,9 +288,10 @@ window.onload = function () {
         })
         .sort((a, b) => b.value - a.value)
         .slice(0, 10);
-  
+    
       renderBarChart(sportsTop10, "#sportsChart", "Sports Participation (%)");
       renderBarChart(obesityTop10, "#obesityChart", "Obesity Rate (%)");
     }
+    
   });
   
