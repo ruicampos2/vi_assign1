@@ -24,7 +24,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (!dataByCountry[d['Country']]) {
                     dataByCountry[d['Country']] = { children: {}, adult: {} };
                 }
+
+                const football = parseFloat(d['Football (%)']) || 0;
+                const basketball = parseFloat(d['Basketball (%)']) || 0;
+                const running = parseFloat(d['Running (%)']) || 0;
+                const averageSportsParticipation = ((football + basketball + running) / 3).toFixed(2);
+
                 dataByCountry[d['Country']][d.Group.toLowerCase()][d.Gender.toLowerCase()] = {
+                    "General (%)": averageSportsParticipation,
                     "Obesity Rate (%)": d["Obesity Rate (%)"],
                     "Football (%)": d["Football (%)"],
                     "Basketball (%)": d["Basketball (%)"],
@@ -136,7 +143,6 @@ document.addEventListener('DOMContentLoaded', function () {
                                 console.log("Métrica não encontrada para " + ageGroup + " " + gender + ": " + metricWithPercent);
                             }
                         });
-
                     });
                 });
             }
@@ -338,6 +344,8 @@ window.onload = function () {
 
 function getColor(metric) {
     switch (metric) {
+        case 'General (%)':
+            return 'purple'; // Roxo para Geral
         case 'Football (%)':
             return 'steelblue'; // Azul para Futebol
         case 'Basketball (%)':
