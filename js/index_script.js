@@ -193,6 +193,7 @@ Promise.all([
   function drawMaps() {
     drawMap("#map1", "sports", "Global Sports Participation Rate", sportColorScale);
     drawMap("#map2", "obesity", "Global Obesity Rate", obesityColorScale);
+    updateTop10Lists(dataByCountry);
   }
 
   drawMaps();
@@ -204,8 +205,8 @@ Promise.all([
   }
 
   document.getElementById("generateBtn").addEventListener("click", () => {
-    updateFilters();
     updateTop10Lists(dataByCountry);
+    updateFilters();
   });
 
 
@@ -253,12 +254,6 @@ document.addEventListener("DOMContentLoaded", function () {
 
   // Seleciona o contêiner dos mapas
   const mapContainer = document.querySelector(".maps-container");
-
-  // Adiciona o evento para abrir o modal quando clicar em "View Top 10"
-  // document.getElementById("viewTop10Btn").addEventListener("click", showTop10Modal);
-
-  // // Adiciona o evento para fechar o modal quando clicar em "Close"
-  // document.getElementById("closeModalBtn").addEventListener("click", closeModal);
 
   function showTop10Modal() {
     // Exibe o modal
