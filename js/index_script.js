@@ -15,12 +15,14 @@ var selectedCountryCodes = new Set(); // Armazena os códigos dos países seleci
 let dataByCountry = {}; // Coloca o dataByCountry em um escopo acessível
 
 function renderBarChart(data, containerId, yLabel) {
+  // Remover qualquer gráfico existente
   d3.select(containerId).selectAll("*").remove();
 
   const margin = { top: 20, right: 30, bottom: 40, left: 90 };
   const width = 500 - margin.left - margin.right;
   const height = 300 - margin.top - margin.bottom;
 
+  // Criar SVG
   const svg = d3.select(containerId)
     .append("svg")
     .attr("width", width + margin.left + margin.right)
@@ -28,7 +30,7 @@ function renderBarChart(data, containerId, yLabel) {
     .append("g")
     .attr("transform", `translate(${margin.left},${margin.top})`);
 
-  // Define a escala do eixo X
+  // Escalas
   const x = d3.scaleLinear()
     .domain([0, d3.max(data, d => d.value)])
     .range([0, width]);
@@ -38,6 +40,21 @@ function renderBarChart(data, containerId, yLabel) {
     .range([0, height])
     .padding(0.1);
 
+  // Criar tooltip
+  const tooltip = d3.select("body")
+    .append("div")
+    .attr("class", "tooltip")
+    .style("position", "absolute")
+    .style("visibility", "hidden")
+    .style("background-color", "rgba(0, 0, 0, 0.7)")
+    .style("color", "white")
+    .style("padding", "5px")
+    .style("border-radius", "5px")
+    .style("font-size", "12px")
+    .style("pointer-events", "none")
+    .style("z-index", "9999"); // Adicionado para ficar acima do modal
+
+  // Criar barras
   svg.selectAll("rect")
     .data(data)
     .enter()
@@ -46,17 +63,32 @@ function renderBarChart(data, containerId, yLabel) {
     .attr("y", d => y(d.country))
     .attr("width", d => x(d.value))
     .attr("height", y.bandwidth())
-    .attr("fill", "#69b3a2");
+    .attr("fill", "#69b3a2")
+    .on("mouseover", function (event, d) {
+      tooltip.style("visibility", "visible")
+        .text(`${d.country}: ${d.value.toFixed(2)}%`);
+    })
+    .on("mousemove", function (event) {
+      tooltip.style("top", (event.pageY - 40) + "px")
+        .style("left", (event.pageX + 10) + "px");
+    })
+    .on("mouseout", function () {
+      tooltip.style("visibility", "hidden");
+    });
 
+  // Adicionar eixos
   svg.append("g").call(d3.axisLeft(y));
   svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
 
+  // Adicionar título ao eixo X
   svg.append("text")
     .attr("x", width / 2)
     .attr("y", height + margin.bottom - 5)
     .attr("text-anchor", "middle")
+    .attr("font-size", "12px")
     .text(yLabel);
 }
+
 
 function updateTop10Lists(dataByCountry) {
   const ageGroup = selectedFilters.ageGroup;
