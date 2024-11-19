@@ -46,7 +46,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     .attr("type", "checkbox")
                     .attr("value", countryName)
                     .on("change", function () { selectCountry(this); });
-                
+
                 dropdownContent.append("text").text(countryName);
             }
         });
@@ -142,6 +142,15 @@ document.addEventListener('DOMContentLoaded', function () {
             }
 
         });
+
+        // Ordenar os dados para que as métricas fiquem juntas
+        filteredData.sort((a, b) => {
+            if (a.metric === b.metric) {
+                return a.country.localeCompare(b.country); // Ordena por país se as métricas forem iguais
+            }
+            return a.metric.localeCompare(b.metric); // Ordena por métrica
+        });
+
 
         // Definir dimensões do gráfico
         const margin = { top: 30, right: 30, bottom: 200, left: 100 };  // Aumentar a margem inferior
@@ -348,15 +357,15 @@ function filterDropdown() {
     filter = input.value.toUpperCase();
     dropdownContent = document.getElementById("dropdown-content");
     labels = dropdownContent.getElementsByTagName("label");
-  
+
     // Loop para esconder os países que não correspondem ao filtro
     for (i = 0; i < labels.length; i++) {
-      label = labels[i];
-      if (label.textContent.toUpperCase().indexOf(filter) > -1) {
-        label.style.display = "";
-      } else {
-        label.style.display = "none";
-      }
+        label = labels[i];
+        if (label.textContent.toUpperCase().indexOf(filter) > -1) {
+            label.style.display = "";
+        } else {
+            label.style.display = "none";
+        }
     }
 }
 
@@ -365,17 +374,17 @@ function filterCountries() {
     const filter = input.value.toUpperCase();
     const dropdownContent = document.getElementById("dropdown-content");
     const labels = dropdownContent.getElementsByTagName("label");
-  
+
     // Loop através de todos os itens do dropdown e mostra/oculta conforme a correspondência
     for (let i = 0; i < labels.length; i++) {
-      const label = labels[i];
-      const txtValue = label.textContent || label.innerText;
-      if (txtValue.toUpperCase().indexOf(filter) > -1) {
-        label.style.display = "";
-      } else {
-        label.style.display = "none";
-      }
+        const label = labels[i];
+        const txtValue = label.textContent || label.innerText;
+        if (txtValue.toUpperCase().indexOf(filter) > -1) {
+            label.style.display = "";
+        } else {
+            label.style.display = "none";
+        }
     }
-  }
-  
-  
+}
+
+

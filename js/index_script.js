@@ -14,6 +14,80 @@ var selectedCountryCodes = new Set(); // Armazena os códigos dos países seleci
 
 let dataByCountry = {}; // Coloca o dataByCountry em um escopo acessível
 
+function renderBarChart(data, containerId, yLabel) {
+  d3.select(containerId).selectAll("*").remove();
+
+  const margin = { top: 20, right: 30, bottom: 40, left: 90 };
+  const width = 500 - margin.left - margin.right;
+  const height = 300 - margin.top - margin.bottom;
+
+  const svg = d3.select(containerId)
+    .append("svg")
+    .attr("width", width + margin.left + margin.right)
+    .attr("height", height + margin.top + margin.bottom)
+    .append("g")
+    .attr("transform", `translate(${margin.left},${margin.top})`);
+
+  // Define a escala do eixo X
+  const x = d3.scaleLinear()
+    .domain([0, d3.max(data, d => d.value)])
+    .range([0, width]);
+
+  const y = d3.scaleBand()
+    .domain(data.map(d => d.country))
+    .range([0, height])
+    .padding(0.1);
+
+  svg.selectAll("rect")
+    .data(data)
+    .enter()
+    .append("rect")
+    .attr("x", x(0))
+    .attr("y", d => y(d.country))
+    .attr("width", d => x(d.value))
+    .attr("height", y.bandwidth())
+    .attr("fill", "#69b3a2");
+
+  svg.append("g").call(d3.axisLeft(y));
+  svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
+
+  svg.append("text")
+    .attr("x", width / 2)
+    .attr("y", height + margin.bottom - 5)
+    .attr("text-anchor", "middle")
+    .text(yLabel);
+}
+
+function updateTop10Lists(dataByCountry) {
+  const ageGroup = selectedFilters.ageGroup;
+  const gender = selectedFilters.gender;
+
+  const sportsTop10 = Object.values(dataByCountry)
+    .map(countryData => {
+      const data = countryData[ageGroup][gender];
+      return {
+        country: data.Country,
+        value: parseFloat(data['Sports Participation (%)'] || 0)
+      };
+    })
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+
+  const obesityTop10 = Object.values(dataByCountry)
+    .map(countryData => {
+      const data = countryData[ageGroup][gender];
+      return {
+        country: data.Country,
+        value: parseFloat(data['Obesity Rate (%)'] || 0)
+      };
+    })
+    .sort((a, b) => b.value - a.value)
+    .slice(0, 10);
+
+  renderBarChart(sportsTop10, "#sportsChart", "Sports Participation (%)");
+  renderBarChart(obesityTop10, "#obesityChart", "Obesity Rate (%)");
+}
+
 Promise.all([
   d3.json("https://d3js.org/world-110m.v1.json"),
   d3.csv("dataset/dataset.csv")
@@ -126,21 +200,14 @@ Promise.all([
   function updateFilters() {
     selectedFilters.ageGroup = document.querySelector("input[name='ageGroup']:checked").value;
     selectedFilters.gender = document.querySelector("input[name='gender']:checked").value;
-  
-    // Atualiza os mapas
     drawMaps();
-  
-    const top10Modal = document.getElementById("top10Modal");
-    const isModalVisible = window.getComputedStyle(top10Modal).display === "block";
-
-    if (isModalVisible) {
-      updateTop10Lists(dataByCountry); // Atualiza os gráficos do Top 10
-    }
-
   }
-  
 
-  document.getElementById("generateBtn").addEventListener("click", updateFilters);
+  document.getElementById("generateBtn").addEventListener("click", () => {
+    updateFilters();
+    updateTop10Lists(dataByCountry);
+  });
+
 
 }).catch(function (error) {
   console.error("Error loading data: ", error);
@@ -176,122 +243,40 @@ window.onload = function () {
 };
 
 
-  document.addEventListener("DOMContentLoaded", function () {
+document.addEventListener("DOMContentLoaded", function () {
 
-    document.getElementById("viewTop10Btn").addEventListener("click", showTop10Modal);
+  document.getElementById("viewTop10Btn").addEventListener("click", showTop10Modal);
 
   // Adiciona o evento para fechar o modal quando clicar em "Close"
   document.getElementById("closeModalBtn").addEventListener("click", closeModal);
 
+
+  // Seleciona o contêiner dos mapas
+  const mapContainer = document.querySelector(".maps-container");
+
+  // Adiciona o evento para abrir o modal quando clicar em "View Top 10"
+  // document.getElementById("viewTop10Btn").addEventListener("click", showTop10Modal);
+
+  // // Adiciona o evento para fechar o modal quando clicar em "Close"
+  // document.getElementById("closeModalBtn").addEventListener("click", closeModal);
+
   function showTop10Modal() {
-      updateTop10Lists(dataByCountry);
-      document.getElementById("top10Modal").style.display = "block";
+    // Exibe o modal
+    document.getElementById("top10Modal").style.display = "block";
+
+    // Torna os mapas opacos
+    mapContainer.style.opacity = "0.3";
   }
 
   function closeModal() {
-      document.getElementById("top10Modal").style.display = "none";
+    // Esconde o modal
+    document.getElementById("top10Modal").style.display = "none";
+
+    // Restaura a opacidade dos mapas
+    mapContainer.style.opacity = "1";
   }
-    // Seleciona o contêiner dos mapas
-    const mapContainer = document.querySelector(".maps-container");
-  
-    // Adiciona o evento para abrir o modal quando clicar em "View Top 10"
-    document.getElementById("viewTop10Btn").addEventListener("click", showTop10Modal);
-  
-    // Adiciona o evento para fechar o modal quando clicar em "Close"
-    document.getElementById("closeModalBtn").addEventListener("click", closeModal);
-  
-    function showTop10Modal() {
-      // Atualiza os gráficos no modal
-      updateTop10Lists(dataByCountry);
-  
-      // Exibe o modal
-      document.getElementById("top10Modal").style.display = "block";
-  
-      // Torna os mapas opacos
-      mapContainer.style.opacity = "0.3";
-    }
-  
-    function closeModal() {
-      // Esconde o modal
-      document.getElementById("top10Modal").style.display = "none";
-  
-      // Restaura a opacidade dos mapas
-      mapContainer.style.opacity = "1";
-    }
-  
-    function renderBarChart(data, containerId, yLabel) {
-      d3.select(containerId).selectAll("*").remove();
-  
-      const margin = { top: 20, right: 30, bottom: 40, left: 90 };
-      const width = 500 - margin.left - margin.right;
-      const height = 300 - margin.top - margin.bottom;
-  
-      const svg = d3.select(containerId)
-        .append("svg")
-        .attr("width", width + margin.left + margin.right)
-        .attr("height", height + margin.top + margin.bottom)
-        .append("g")
-        .attr("transform", `translate(${margin.left},${margin.top})`);
-  
-      // Define a escala do eixo X
-      const x = d3.scaleLinear()
-        .domain([0, 50])
-        .range([0, width]);
-  
-      const y = d3.scaleBand()
-        .domain(data.map(d => d.country))
-        .range([0, height])
-        .padding(0.1);
-  
-      svg.selectAll("rect")
-        .data(data)
-        .enter()
-        .append("rect")
-        .attr("x", x(0))
-        .attr("y", d => y(d.country))
-        .attr("width", d => x(d.value))
-        .attr("height", y.bandwidth())
-        .attr("fill", "#69b3a2");
-  
-      svg.append("g").call(d3.axisLeft(y));
-      svg.append("g").attr("transform", `translate(0,${height})`).call(d3.axisBottom(x));
-  
-      svg.append("text")
-        .attr("x", width / 2)
-        .attr("y", height + margin.bottom - 5)
-        .attr("text-anchor", "middle")
-        .text(yLabel);
-    }
-  
-    function updateTop10Lists(dataByCountry) {
-      const ageGroup = selectedFilters.ageGroup;
-      const gender = selectedFilters.gender;
-    
-      const sportsTop10 = Object.values(dataByCountry)
-        .map(countryData => {
-          const data = countryData[ageGroup][gender];
-          return {
-            country: data.Country,
-            value: parseFloat(data['Sports Participation (%)'] || 0)
-          };
-        })
-        .sort((a, b) => b.value - a.value)
-        .slice(0, 10);
-    
-      const obesityTop10 = Object.values(dataByCountry)
-        .map(countryData => {
-          const data = countryData[ageGroup][gender];
-          return {
-            country: data.Country,
-            value: parseFloat(data['Obesity Rate (%)'] || 0)
-          };
-        })
-        .sort((a, b) => b.value - a.value)
-        .slice(0, 10);
-    
-      renderBarChart(sportsTop10, "#sportsChart", "Sports Participation (%)");
-      renderBarChart(obesityTop10, "#obesityChart", "Obesity Rate (%)");
-    }
-    
-  });
-  
+
+
+
+
+});
