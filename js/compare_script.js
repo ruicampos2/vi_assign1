@@ -31,7 +31,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 const averageSportsParticipation = ((football + basketball + running) / 3).toFixed(2);
 
                 dataByCountry[d['Country']][d.Group.toLowerCase()][d.Gender.toLowerCase()] = {
-                    "Sports General (%)": averageSportsParticipation,
+                    "General (%)": averageSportsParticipation,
                     "Obesity Rate (%)": d["Obesity Rate (%)"],
                     "Football (%)": d["Football (%)"],
                     "Basketball (%)": d["Basketball (%)"],
