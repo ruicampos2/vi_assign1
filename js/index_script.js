@@ -144,29 +144,6 @@ Promise.all([
     }
   });
 
-  function addScaleBar(svg, projection) {
-    const scaleBar = svg.append("g")
-        .attr("class", "scale-bar")
-        .attr("transform", `translate(50, ${height - 30})`); // Ajusta a posição da escala no mapa
-
-    const scale = d3.scaleLinear()
-        .domain([0, 500]) // Define o domínio (500 km neste exemplo)
-        .range([0, 100]); // Define o comprimento em pixels da barra (100 px neste exemplo)
-
-    const axisBottom = d3.axisBottom(scale)
-        .ticks(5) // Define o número de divisões
-        .tickFormat(d => `${d} km`); // Adiciona "km" ao rótulo
-
-    scaleBar.append("g").call(axisBottom);
-
-    scaleBar.append("rect")
-        .attr("width", 100)
-        .attr("height", 10)
-        .attr("fill", "#ccc")
-        .attr("x", 0)
-        .attr("y", -10);
-  }
-
   function addColorLegend(svg, colorScale, title, x, y) {
     const legend = svg.append("g")
         .attr("class", "color-legend")
@@ -174,28 +151,35 @@ Promise.all([
 
     const legendData = colorScale.range().map(color => {
         const d = colorScale.invertExtent(color);
-        return { color, value: d[0].toFixed(2) };
+        return { color, value: d[0] };
     });
 
+    // Formata os números (arredonda para 1 casa decimal)
+    const formatNumber = d3.format(".1f");
+
+    // Adiciona os retângulos coloridos da legenda
     legend.selectAll("rect")
         .data(legendData)
         .enter()
         .append("rect")
-        .attr("x", 0)
-        .attr("y", (d, i) => i * 20)
-        .attr("width", 20)
+        .attr("x", (d, i) => i * 30) // Ajuste horizontal para escala
+        .attr("y", 0)
+        .attr("width", 30)
         .attr("height", 20)
         .attr("fill", d => d.color);
 
+    // Adiciona os valores formatados
     legend.selectAll("text")
         .data(legendData)
         .enter()
         .append("text")
-        .attr("x", 25)
-        .attr("y", (d, i) => i * 20 + 15)
-        .text(d => d.value)
-        .style("font-size", "12px");
+        .attr("x", (d, i) => i * 30 + 15) // Ajuste horizontal para texto
+        .attr("y", 40)
+        .text(d => formatNumber(d.value)) // Aplica o formato
+        .style("font-size", "12px")
+        .style("text-anchor", "middle");
 
+    // Adiciona o título da legenda
     legend.append("text")
         .attr("x", 0)
         .attr("y", -10)
@@ -204,13 +188,16 @@ Promise.all([
         .style("font-weight", "bold");
   }
 
+
   function drawMap(containerId, dataType, title, colorScale) {
     d3.select(containerId).selectAll("svg").remove();
     var svg = d3.select(containerId).append("svg").attr("width", width).attr("height", height);
     
-    addColorLegend(svg, sportColorScale, "Sports Participation (%)", width - 150, 20);
-    addColorLegend(svg, obesityColorScale, "Obesity Rate (%)", width - 150, 300);
-    addScaleBar(svg, projection);
+    if (dataType == "sports"){
+      addColorLegend(svg, sportColorScale, "Sports Participation (%)", width - 350, 20);
+    }
+    else
+      addColorLegend(svg, obesityColorScale, "Obesity Rate (%)", width - 300, 20);
 
 
     svg.selectAll("path")
