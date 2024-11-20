@@ -155,7 +155,7 @@ Promise.all([
     });
 
     // Formata os números (arredonda para 1 casa decimal)
-    const formatNumber = d3.format(".1f");
+    const formatNumber = d3.format(".0f");
 
     // Adiciona os retângulos coloridos da legenda
     legend.selectAll("rect")
